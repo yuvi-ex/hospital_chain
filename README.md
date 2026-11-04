@@ -35,21 +35,7 @@ of the same console runs as a fallback.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  U["Browser"] --> C["Console<br/>dash-server app"]
-  A["AI agent<br/>exasol-mcp-server<br/>as a named user"] --> E
-  C -- "read-only user" --> E
-  subgraph VM["Exasol Personal VM"]
-    E["Exasol<br/>HOSP_GOV governed views<br/>HOSP_CORE patient index, rules, note vectors<br/>HOSP_SRC one vocabulary over both systems"]
-    PG[("Legacy HIS<br/>Postgres 16")]
-    MG[("Modern EHR<br/>MongoDB 8.2")]
-    E -- "virtual schema (JDBC)" --> PG
-    E -- "virtual schema (Rust adapter)" --> MG
-  end
-  E -- "IMPORT of the header index, in place" --> S3[("DICOM archive<br/>Amazon S3")]
-  C -- "signed link, image bytes only" --> S3
-```
+![Architecture: browser and AI agent query Exasol; inside the Exasol Personal VM, Exasol reads the legacy HIS on Postgres and the modern EHR on MongoDB through virtual schemas, and imports the DICOM header index from Amazon S3 in place; the console fetches image bytes from S3 with a signed link](docs/architecture.svg)
 
 | Layer | Schema | What it does | Stored or live |
 |---|---|---|---|
@@ -202,7 +188,7 @@ Run these from the repository root.
 | `app/` | the Streamlit fallback console |
 | `agent/mcp_runner.py` | starts `exasol-mcp-server` as a named user for the "Who is asking" tab |
 | `tools/` | headless browser test and the static review export |
-| `docs/` | `tech-spec.html` (the full technical specification) and the screenshots in this README |
+| `docs/` | `tech-spec.html` (the full technical specification), the architecture diagram and the screenshots in this README |
 | `config.env`, `hcconfig.py` | settings, read by the shell scripts and the Python code |
 
 ## Things that will bite

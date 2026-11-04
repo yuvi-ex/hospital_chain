@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 620" width="1300" height="620" role="img" aria-labelledby="t d" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title id="t">Architecture: one patient, every branch</title>
+<desc id="d">A browser opens the console on dash-server, which queries Exasol as a read-only user; an AI agent (exasol-mcp-server) queries Exasol as a named user. Inside the Exasol Personal VM, Exasol reads the legacy HIS on Postgres 16 through a JDBC virtual schema and the modern EHR on MongoDB 8.2 through a Rust-adapter virtual schema. Exasol imports the DICOM header index from Amazon S3 in place; the console fetches image bytes from S3 with a signed link.</desc>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker></defs>
+<rect x="0.5" y="0.5" width="1299" height="619" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+<rect x="320" y="40" width="715" height="500" rx="16" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="338" y="66" font-size="13" font-weight="700" fill="#475569" letter-spacing=".04em">EXASOL PERSONAL VM</text>
+<rect x="40" y="70" width="200" height="56" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.6"/>
+<text x="140.0" y="103.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F172A">Browser</text>
+<rect x="40" y="210" width="200" height="72" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.6"/>
+<text x="140.0" y="242.5" text-anchor="middle" font-size="15" font-weight="700" fill="#0F172A">Console</text>
+<text x="140.0" y="261.5" text-anchor="middle" font-size="12.5" fill="#334155">dash-server app</text>
+<rect x="40" y="400" width="200" height="90" rx="10" fill="#F1F5F9" stroke="#64748B" stroke-width="1.6"/>
+<text x="140.0" y="433.0" text-anchor="middle" font-size="15" font-weight="700" fill="#0F172A">AI agent</text>
+<text x="140.0" y="452.0" text-anchor="middle" font-size="12.5" fill="#334155">exasol-mcp-server</text>
+<text x="140.0" y="469.0" text-anchor="middle" font-size="12.5" fill="#334155">as a named user</text>
+<rect x="345" y="160" width="345" height="228" rx="12" fill="#E6F4F1" stroke="#12796A" stroke-width="2"/>
+<text x="365" y="194" font-size="18" font-weight="800" fill="#0B5C51">Exasol</text>
+<rect x="359" y="218" width="317" height="38" rx="7" fill="#FFFFFF" stroke="#B9DDD5"/>
+<text x="371" y="242" font-size="12" font-weight="700" fill="#0B5C51" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">HOSP_GOV</text>
+<text x="473" y="242" font-size="12.5" fill="#334155">governed views</text>
+<rect x="359" y="264" width="317" height="38" rx="7" fill="#FFFFFF" stroke="#B9DDD5"/>
+<text x="371" y="288" font-size="12" font-weight="700" fill="#0B5C51" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">HOSP_CORE</text>
+<text x="473" y="288" font-size="12.5" fill="#334155">patient index, rules, vectors</text>
+<rect x="359" y="310" width="317" height="38" rx="7" fill="#FFFFFF" stroke="#B9DDD5"/>
+<text x="371" y="334" font-size="12" font-weight="700" fill="#0B5C51" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">HOSP_SRC</text>
+<text x="473" y="334" font-size="12.5" fill="#334155">one vocabulary over both</text>
+<path d="M860,184 v82 a75.0,9 0 0 0 150,0 v-82" fill="#EAF1F8" stroke="#336791" stroke-width="1.6"/>
+<ellipse cx="935.0" cy="184" rx="75.0" ry="9" fill="#EAF1F8" stroke="#336791" stroke-width="1.6"/>
+<text x="935.0" y="230.5" text-anchor="middle" font-size="15" font-weight="700" fill="#1F4E79">Legacy HIS</text>
+<text x="935.0" y="249.5" text-anchor="middle" font-size="12.5" fill="#334155">Postgres 16</text>
+<path d="M860,299 v82 a75.0,9 0 0 0 150,0 v-82" fill="#E8F6EE" stroke="#1E8E50" stroke-width="1.6"/>
+<ellipse cx="935.0" cy="299" rx="75.0" ry="9" fill="#E8F6EE" stroke="#1E8E50" stroke-width="1.6"/>
+<text x="935.0" y="345.5" text-anchor="middle" font-size="15" font-weight="700" fill="#116149">Modern EHR</text>
+<text x="935.0" y="364.5" text-anchor="middle" font-size="12.5" fill="#334155">MongoDB 8.2</text>
+<path d="M1080,259 v82 a90.0,9 0 0 0 180,0 v-82" fill="#FFF4E5" stroke="#C77700" stroke-width="1.6"/>
+<ellipse cx="1170.0" cy="259" rx="90.0" ry="9" fill="#FFF4E5" stroke="#C77700" stroke-width="1.6"/>
+<text x="1170.0" y="305.5" text-anchor="middle" font-size="15" font-weight="700" fill="#8A4B00">DICOM archive</text>
+<text x="1170.0" y="324.5" text-anchor="middle" font-size="12.5" fill="#334155">Amazon S3</text>
+<path d="M140,126 L140,208" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M240,246 L343,246" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="292" y="236" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">read-only user</text>
+<path d="M240,445 L300,445 L300,330 L343,330" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M690,230 L858,230" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="774" y="205" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">virtual schema</text>
+<text x="774" y="220" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">(JDBC)</text>
+<path d="M690,345 L858,345" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="774" y="320" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">virtual schema</text>
+<text x="774" y="335" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">(Rust adapter)</text>
+<path d="M517,160 L517,110 L1170,110 L1170,248" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="800" y="104" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">IMPORT of the header index, in place</text>
+<path d="M40,262 L20,262 L20,585 L1170,585 L1170,352" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="640" y="579" text-anchor="middle" font-size="12" font-style="italic" fill="#334155" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" paint-order="stroke">signed link, image bytes only</text>
+</svg>
