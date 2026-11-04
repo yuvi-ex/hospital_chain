@@ -1,0 +1,1566 @@
+<title>Hospital Chain Technical Specification</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reference manual. Sticky contents rail on the left, one 70ch reading column, wide tables and code scroll in place. */
+:root {
+  --bg:#F6F8F8; --paper:#FFFFFF; --ink:#13201F; --muted:#4B5A59; --faint:#728180; --rule:#D9E1E0; --tint:#EEF4F3;
+  --accent:#0F7A6B; --accent-soft:#E1F2EE;
+  --pg:#A85A00; --pg-soft:#FFF3E3; --mg:#00689A; --mg-soft:#E4F3FB; --s3:#4C4FC4; --s3-soft:#EEEFFD;
+  --warn:#9A5B00; --warn-soft:#FFF6E0; --bad:#B4232F; --bad-soft:#FDEDEF;
+  --code-bg:#0E1A1F; --code-fg:#D7E3E8; --code-dim:#7F98A3;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-head:"IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0E1416; --paper:#141C1F; --ink:#E4ECEB; --muted:#A9B8B7; --faint:#82918F; --rule:#2A3638; --tint:#1A2427;
+  --accent:#4FC7B2; --accent-soft:#163430; --pg:#F0A350; --pg-soft:#2E2215; --mg:#5CB8E6; --mg-soft:#14293A; --s3:#9EA1F5; --s3-soft:#20223F;
+  --warn:#F0B44E; --warn-soft:#2E2512; --bad:#F2727C; --bad-soft:#341A1D; --code-bg:#091013; --code-fg:#D7E3E8; --code-dim:#6F8994; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0E1416; --paper:#141C1F; --ink:#E4ECEB; --muted:#A9B8B7; --faint:#82918F; --rule:#2A3638; --tint:#1A2427;
+  --accent:#4FC7B2; --accent-soft:#163430; --pg:#F0A350; --pg-soft:#2E2215; --mg:#5CB8E6; --mg-soft:#14293A; --s3:#9EA1F5; --s3-soft:#20223F;
+  --warn:#F0B44E; --warn-soft:#2E2512; --bad:#F2727C; --bad-soft:#341A1D; --code-bg:#091013; --code-fg:#D7E3E8; --code-dim:#6F8994; color-scheme:dark; }
+
+* { box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.6; }
+.wrap { display:grid; grid-template-columns:16rem minmax(0,1fr); gap:2.5rem; max-width:84rem; margin:0 auto;
+  padding-block:2rem 5rem; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+nav.toc { position:sticky; top:calc(env(safe-area-inset-top, 0px) + 1rem); align-self:start; max-height:calc(100vh - 2rem); overflow:auto; font-size:.86rem; }
+nav.toc .k { font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-bottom:.5rem; }
+nav.toc ol { list-style:none; margin:0; padding:0; display:grid; gap:.1rem; }
+nav.toc a { display:grid; grid-template-columns:1.8rem 1fr; color:var(--muted); text-decoration:none; padding:.2rem .4rem; border-radius:6px; }
+nav.toc a:hover, nav.toc a:focus-visible { background:var(--tint); color:var(--ink); outline:none; }
+nav.toc a span { font-family:var(--f-mono); color:var(--faint); font-size:.78rem; }
+main { min-width:0; }
+.doc { background:var(--paper); border:1px solid var(--rule); border-radius:14px; padding:2.4rem clamp(1rem, 4vw, 3rem) 3rem; }
+header.cover { border-bottom:1px solid var(--rule); padding-bottom:1.6rem; margin-bottom:1rem; }
+.cover .meta { font-family:var(--f-mono); font-size:.76rem; color:var(--faint); letter-spacing:.06em; display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; }
+h1 { font-family:var(--f-head); font-size:clamp(2rem, 4.5vw, 2.9rem); line-height:1.05; letter-spacing:-.01em; margin:.6rem 0 .6rem; text-wrap:balance; }
+.lede { font-size:1.08rem; color:var(--muted); max-width:68ch; margin:0; }
+section { padding-top:2.2rem; scroll-margin-top:1rem; }
+h2 { font-family:var(--f-head); font-size:1.65rem; line-height:1.15; margin:0 0 .8rem; display:flex; gap:.7rem; align-items:baseline; text-wrap:balance; }
+h2 .n { font-family:var(--f-mono); font-size:.9rem; color:var(--accent); font-weight:500; }
+h3 { font-size:1.08rem; margin:1.6rem 0 .4rem; }
+h4 { font-size:.92rem; margin:1.1rem 0 .3rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+p, li { max-width:72ch; }
+p { margin:.5rem 0; }
+ul, ol { padding-left:1.25rem; margin:.4rem 0; } li { margin:.2rem 0; }
+a { color:var(--accent); }
+code { font-family:var(--f-mono); font-size:.86em; background:var(--tint); border-radius:4px; padding:.05em .3em; overflow-wrap:anywhere; }
+pre { font-family:var(--f-mono); font-size:.8rem; line-height:1.55; background:var(--code-bg); color:var(--code-fg); border-radius:10px;
+  padding:.9rem 1.1rem; overflow-x:auto; margin:.7rem 0 1rem; }
+pre code { background:none; padding:0; font-size:inherit; overflow-wrap:normal; }
+pre .c { color:var(--code-dim); }
+pre.mermaid { background:var(--paper); color:var(--ink); border:1px solid var(--rule); text-align:center; }
+.tbl { overflow-x:auto; margin:.7rem 0 1.1rem; border:1px solid var(--rule); border-radius:10px; }
+table { border-collapse:collapse; width:100%; font-size:.88rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem; border-bottom:1px solid var(--rule); }
+th { font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); background:var(--tint); font-weight:600; white-space:nowrap; }
+tr:last-child td { border-bottom:0; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+td code { white-space:nowrap; }
+.tag { display:inline-block; font-family:var(--f-mono); font-size:.7rem; font-weight:500; border-radius:5px; padding:.05rem .4rem; white-space:nowrap; }
+.tag.pg { background:var(--pg-soft); color:var(--pg); } .tag.mg { background:var(--mg-soft); color:var(--mg); } .tag.s3 { background:var(--s3-soft); color:var(--s3); }
+.tag.ex { background:var(--accent-soft); color:var(--accent); }
+.note { border-left:3px solid var(--accent); background:var(--accent-soft); padding:.6rem .9rem; border-radius:0 8px 8px 0; margin:.8rem 0; font-size:.92rem; }
+.note.warn { border-color:var(--warn); background:var(--warn-soft); }
+.note.bad { border-color:var(--bad); background:var(--bad-soft); }
+.note b:first-child { font-weight:700; }
+.facts { display:grid; grid-template-columns:repeat(auto-fit, minmax(11rem, 1fr)); gap:.8rem; margin:1.2rem 0 .4rem; }
+.fact { border:1px solid var(--rule); border-radius:10px; padding:.7rem .85rem; }
+.fact .v { font-family:var(--f-head); font-size:1.5rem; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; }
+.fact .l { font-size:.8rem; color:var(--muted); margin-top:.2rem; line-height:1.35; }
+.steps { counter-reset:s; list-style:none; padding:0; }
+.steps > li { counter-increment:s; position:relative; padding-left:2.3rem; margin:.7rem 0; }
+.steps > li::before { content:counter(s); position:absolute; left:0; top:.05rem; width:1.55rem; height:1.55rem; border-radius:50%;
+  background:var(--accent); color:var(--paper); font-family:var(--f-mono); font-size:.78rem; font-weight:500; display:flex; align-items:center; justify-content:center; }
+.two { display:grid; grid-template-columns:repeat(auto-fit, minmax(17rem, 1fr)); gap:1rem; }
+.card { border:1px solid var(--rule); border-radius:10px; padding:.8rem 1rem; }
+.card h4 { margin-top:0; }
+.qa dt { font-weight:700; margin-top:1rem; max-width:72ch; } .qa dd { margin:.3rem 0 0; color:var(--muted); max-width:72ch; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule); font-size:.82rem; color:var(--faint); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+@media (max-width: 960px) { .wrap { grid-template-columns:1fr; gap:1rem; } nav.toc { position:static; max-height:none; }
+  nav.toc ol { grid-template-columns:repeat(auto-fill, minmax(13rem, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; } }
+html { scroll-behavior:smooth; }
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <div class="k">Contents</div>
+  <ol>
+    <li><a href="#glance"><span>00</span>At a glance</a></li>
+    <li><a href="#arch"><span>01</span>Architecture</a></li>
+    <li><a href="#runtime"><span>02</span>Runtime and network</a></li>
+    <li><a href="#sources"><span>03</span>The three source systems</a></li>
+    <li><a href="#connect"><span>04</span>How Exasol connects</a></li>
+    <li><a href="#vs-pg"><span>05</span>Virtual schema: Postgres</a></li>
+    <li><a href="#vs-mongo"><span>06</span>Virtual schema: MongoDB</a></li>
+    <li><a href="#s3"><span>07</span>Reading S3 in place</a></li>
+    <li><a href="#model"><span>08</span>Data model in Exasol</a></li>
+    <li><a href="#mpi"><span>09</span>Patient index (MPI)</a></li>
+    <li><a href="#logic"><span>10</span>Clinical rules</a></li>
+    <li><a href="#vectors"><span>11</span>Note vectors</a></li>
+    <li><a href="#images"><span>12</span>How images are read</a></li>
+    <li><a href="#gov"><span>13</span>Governance</a></li>
+    <li><a href="#mcp"><span>14</span>AI agents through MCP</a></li>
+    <li><a href="#accel"><span>15</span>Acceleration</a></li>
+    <li><a href="#console"><span>16</span>The console</a></li>
+    <li><a href="#questions"><span>17</span>Six questions, end to end</a></li>
+    <li><a href="#security"><span>18</span>Credentials and security</a></li>
+    <li><a href="#ops"><span>19</span>Build and operate</a></li>
+    <li><a href="#limits"><span>20</span>Known limits</a></li>
+    <li><a href="#faq"><span>21</span>Questions to expect</a></li>
+    <li><a href="#gloss"><span>22</span>Glossary</a></li>
+    <li><a href="#versions"><span>23</span>Component versions</a></li>
+    <li><a href="#files"><span>24</span>Where everything is</a></li>
+    <li><a href="#trouble"><span>25</span>Troubleshooting</a></li>
+    <li><a href="#appx-sql"><span>A</span>Every SQL file</a></li>
+    <li><a href="#appx-q"><span>B</span>Every console query</a></li>
+  </ol>
+</nav>
+
+<main>
+<article class="doc">
+<header class="cover">
+  <div class="meta"><span>HOSPITAL-CHAIN DEMO</span><span>TECHNICAL SPECIFICATION</span><span>EXASOL 2026.2.0-nano.3</span></div>
+  <h1>One patient, every branch: how the hospital-chain demo is built</h1>
+  <p class="lede">A hospital chain with an old hospital information system on Postgres, a modern electronic health record on MongoDB and an imaging archive on Amazon S3. Exasol reads all three where they are, ties the records to one person, applies one set of rules, and answers in about a second. This document explains every part: what each database holds, how Exasol connects to it, how a query travels, and how an image gets from S3 to the screen.</p>
+</header>
+
+<!-- ======================================================= 00 -->
+<section id="glance">
+<h2><span class="n">00</span>At a glance</h2>
+<div class="facts">
+  <div class="fact"><div class="v">3</div><div class="l">source systems: Postgres, MongoDB, S3. None shares a patient ID.</div></div>
+  <div class="fact"><div class="v">1,609 &rarr; 1,224</div><div class="l">patient records resolved to people by the patient index</div></div>
+  <div class="fact"><div class="v">100% / 94.3%</div><div class="l">link precision / recall, measured against the generator's ground truth</div></div>
+  <div class="fact"><div class="v">168</div><div class="l">real DICOM studies on S3 (139 MB), 0 pixels through the database</div></div>
+  <div class="fact"><div class="v">1.5 M</div><div class="l">vector rows (3,976 notes &times; 384 dimensions) in Exasol</div></div>
+  <div class="fact"><div class="v">0.3&ndash;4 s</div><div class="l">per live question across the sources; 0.01 s on the accelerated copy</div></div>
+</div>
+<p><b>The story.</b> Mrs Meenakshi Sundaram, 68, diabetic, was treated in Branch A in 2019 and had anaphylaxis to IV amoxicillin-clavulanate. That fact is free text in the Branch A legacy system. Today she is admitted in Branch B, whose modern EHR has no allergy on file, and the doctor drafts amoxicillin-clavulanate. Neither system can see the conflict. Exasol can, because it reads both live and knows the two records are the same person.</p>
+<p><b>What is real and what is synthetic.</b> The patients, visits, orders and notes are synthetic, generated with a fixed seed (today is fixed at 2026-10-26). The images are real, de-identified studies from The Cancer Imaging Archive (COVID-19-AR chest X-ray/CT and UPENN-GBM brain MRI, CC BY 4.0), relabelled to the synthetic patients. The databases, the S3 bucket, the virtual schemas, the MCP server and the users are all real and running.</p>
+</section>
+
+<!-- ======================================================= 01 -->
+<section id="arch">
+<h2><span class="n">01</span>Architecture</h2>
+<p>Four layers. People and agents talk only to Exasol. Exasol talks to each source through a connector, and only answers travel back.</p>
+<pre class="mermaid">
+flowchart TB
+  U["Clinician / analyst / AI agent<br/>console, SQL tool, MCP client"]
+  subgraph EX["Exasol (one SQL endpoint)"]
+    GOV["HOSP_GOV<br/>governed views: row filter, masking, definitions"]
+    CORE["HOSP_CORE<br/>patient index, clinical rules, note vectors"]
+    SRC["HOSP_SRC<br/>typed views: one vocabulary over all sources"]
+    VS["Virtual schemas + S3 IMPORT<br/>HOSP_LEGACY, HOSP_EHR_*, HOSP_S3"]
+    ACC["HOSP_ACCEL<br/>copy of the hot path"]
+  end
+  PG[("Legacy HIS<br/>Postgres 16<br/>Branch A, Branch C before Apr 2024")]
+  MG[("Modern EHR<br/>MongoDB 8.2<br/>Branch B, Branch C since Apr 2024")]
+  S3[("PACS<br/>Amazon S3 ap-south-1<br/>DICOM + header index")]
+  U --> GOV --> CORE --> SRC --> VS
+  CORE -.-> ACC
+  VS -- "JDBC, pushed-down SQL" --> PG
+  VS -- "scan UDF, find() with filter" --> MG
+  VS -- "signed GET of one CSV" --> S3
+  U -. "signed link, image bytes only" .-> S3
+</pre>
+<div class="tbl"><table>
+<thead><tr><th>Layer</th><th>Schema</th><th>What it does</th><th>Stored or live</th></tr></thead>
+<tbody>
+<tr><td>Access</td><td><code>HOSP_GOV</code></td><td>Five governed views with the certified definitions in <code>COMMENT IS</code>. Rows filtered by <code>CURRENT_USER</code>, identity masked for analysts.</td><td>Views, live</td></tr>
+<tr><td>Meaning</td><td><code>HOSP_CORE</code></td><td>Patient index, encounters, allergies, orders, the safety check, readmissions, note vectors, imaging.</td><td>Index and vectors stored; everything else views over live data</td></tr>
+<tr><td>Vocabulary</td><td><code>HOSP_SRC</code></td><td>One shape for both systems: text dates parsed, names split, nested documents flattened.</td><td>Views, live</td></tr>
+<tr><td>Connectors</td><td><code>HOSP_LEGACY</code>, <code>HOSP_EHR_PATIENTS</code>, <code>HOSP_EHR_ENCOUNTERS</code>, connection <code>HOSP_S3</code></td><td>The sources, queried where they are, read-only.</td><td>Nothing stored</td></tr>
+<tr><td>Speed</td><td><code>HOSP_ACCEL</code></td><td>A copy of encounters, built once from the live views, for the readmission question.</td><td>Stored table</td></tr>
+</tbody></table></div>
+<p>The guiding rule: <b>everything expensive happens once, a question only reads.</b> Matching identities and embedding notes are done ahead of time (nightly in production). A question reads the sources live, joins in Exasol, and returns.</p>
+</section>
+
+<!-- ======================================================= 02 -->
+<section id="runtime">
+<h2><span class="n">02</span>Runtime and network</h2>
+<p>Everything runs on one MacBook, plus one S3 bucket in AWS.</p>
+<pre class="mermaid">
+flowchart LR
+  subgraph MAC["MacBook (macOS 27, Apple silicon)"]
+    BR["Browser"]
+    DS["dash-server :5100<br/>console app hospital-chain"]
+    ST["Streamlit :8515<br/>fallback console"]
+    RUN["agent/mcp_runner.py<br/>starts exasol-mcp-server"]
+    subgraph VM["Exasol Personal VM  (192.168.64.129)"]
+      DB["Exasol DB<br/>:8563 (forwarded to 127.0.0.1)"]
+      subgraph POD["podman bridge  (gateway 10.88.0.1)"]
+        P["hc-legacy-pg<br/>Postgres 16, :55432"]
+        M["hc-modern-mongo<br/>MongoDB 8.2, :37017"]
+      end
+    end
+  end
+  S3["S3 bucket<br/>&lt;your-bucket&gt;<br/>ap-south-1"]
+  BR --> DS --> DB
+  RUN --> DB
+  DB -- "10.88.0.1:55432 JDBC" --> P
+  DB -- "10.88.0.1:37017 Mongo wire" --> M
+  DB -- "HTTPS" --> S3
+  BR -- "HTTPS signed URL" --> S3
+</pre>
+<div class="tbl"><table>
+<thead><tr><th>Component</th><th>Where</th><th>Address</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Exasol database</td><td>Exasol Personal VM</td><td><code>127.0.0.1:8563</code> from the Mac</td><td>Version 2026.2.0-nano.3. TLS with a self-signed certificate, so clients skip the certificate check.</td></tr>
+<tr><td>Legacy HIS</td><td>podman container <code>hc-legacy-pg</code> inside the VM</td><td>Exasol: <code>10.88.0.1:55432</code>; Mac: <code>192.168.64.129:55432</code></td><td>Postgres 16, database <code>branch_a_his</code>, schema <code>his</code></td></tr>
+<tr><td>Modern EHR</td><td>podman container <code>hc-modern-mongo</code> inside the VM</td><td>Exasol: <code>10.88.0.1:37017</code>; Mac: <code>192.168.64.129:37017</code></td><td>MongoDB 8.2, database <code>ehr</code></td></tr>
+<tr><td>PACS</td><td>Amazon S3</td><td><code>https://&lt;your-bucket&gt;.s3.ap-south-1.amazonaws.com</code></td><td>your AWS account (HC_S3_BUCKET in config.env), Mumbai region</td></tr>
+<tr><td>Console</td><td>dash-server on the Mac</td><td><code>http://127.0.0.1:5100/apps/hospital-chain</code></td><td>Streamlit fallback on <code>:8515</code></td></tr>
+</tbody></table></div>
+<h3>Why the sources run inside the Exasol VM</h3>
+<p>The first build ran Postgres and MongoDB in Docker on the Mac. A managed laptop firewall that blocks inbound connections to every app, so the VM could open a TCP connection to a Docker port but was cut off immediately. Moving both sources into podman inside the VM puts them on the same host as the database: Exasol reaches them through the podman bridge gateway <code>10.88.0.1</code>, and the Mac reaches them outbound on the VM's IP. In a customer deployment the sources would simply be other hosts on the network, reached the same way.</p>
+<div class="note warn"><b>After the VM restarts</b> the containers do not come back on their own (the VM has no systemd), and the VM clock can freeze after the Mac sleeps, which makes S3 refuse signed requests with 403. <code>setup/preflight.sh</code> fixes both.</div>
+</section>
+
+<!-- ======================================================= 03 -->
+<section id="sources">
+<h2><span class="n">03</span>The three source systems</h2>
+<p>The data generator (<code>data/generate.py</code>, seed 20261026) creates 1,200 people and writes each one into the system that would really hold them:</p>
+<div class="tbl"><table>
+<thead><tr><th>Branch</th><th>System</th><th>Rule</th></tr></thead>
+<tbody>
+<tr><td>Branch A (BRA)</td><td><span class="tag pg">Postgres</span> legacy HIS</td><td>All visits, ever.</td></tr>
+<tr><td>Branch B (BRB)</td><td><span class="tag mg">MongoDB</span> modern EHR</td><td>All visits, ever.</td></tr>
+<tr><td>Branch C (BRC)</td><td>Both</td><td>Visits before 2024-04-01 in the legacy HIS, after it in the modern EHR. The same patients are registered twice.</td></tr>
+</tbody></table></div>
+<p>Registrations carry the mess real ones have: surnames as initials, spelling variants (Meenakshi / Minakshi), day and month swapped, two-digit years, age instead of birth date, landlines instead of mobiles. Which record belongs to which person is written to <code>data/out/truth_*.csv</code> and is <b>never loaded into Exasol</b>: the matching has to earn its answer, and the truth file is only used to measure it.</p>
+
+<h3 id="gen">How the data was generated</h3>
+<p>Everything comes from one seeded random generator (<code>random.Random(20261026)</code>), so a rerun produces identical data. The rules, in the order the generator applies them:</p>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>Rule</th></tr></thead>
+<tbody>
+<tr><td>People</td><td>1,200. Sex 50/50. Age normal around 56 (sd 16), clipped to 19–92. Home branch Branch A 40%, Branch B 35%, Branch C 25%. 10-digit mobile starting with 9.</td></tr>
+<tr><td>Chronic conditions</td><td>Diabetes 34% of over-40s; hypertension 38% of over-40s; COPD 12% and coronary disease 15% of over-50s; asthma 7%; glioma 1.5%.</td></tr>
+<tr><td>Allergies</td><td>16% of people. Of those: penicillin 60%, sulfonamide 20%, NSAID 15%, cephalosporin 5%. Reaction picked per allergen (penicillin: anaphylaxis, urticaria or rash). Year 2012–2022.</td></tr>
+<tr><td>Visits</td><td>Exponential, mean 5 per person, over the last ~10 years. 18% of people also use a second branch (35% of their visits go there). The condition per visit is weighted by the person's chronic conditions (pneumonia more likely for diabetics, and so on).</td></tr>
+<tr><td>Which system</td><td>Branch A &rarr; legacy. Branch B &rarr; modern. Branch C &rarr; legacy before 2024-04-01, modern after.</td></tr>
+<tr><td>Readmissions</td><td>9% of finished inpatient stays get another admission 2–29 days later; 45% of those at a different branch, so many cross systems.</td></tr>
+<tr><td>In a bed now</td><td>46 current admissions in Branch B or Branch C (EHR, <code>in-progress</code>): 16 chosen from Branch A patients with an allergy, 30 at random. The hero is the 47th.</td></tr>
+<tr><td>Treatment</td><td>A clinician avoids penicillins only if the allergy is recorded <i>in the system they are using</i>. So patients whose allergy lives only in the legacy system can get a penicillin in the EHR, which is what the safety check finds.</td></tr>
+<tr><td>Legacy registration</td><td>Each legacy branch registers the patient again (new <code>PAT_NO</code> per branch). Name: 55% <code>GIVEN S</code>, 20% <code>S. GIVEN</code>, 25% full; 12% spelling variant. Birth date: 4% missing (age only), 8% two-digit year, 5% day/month swapped (when day &le; 12), otherwise <code>DD/MM/YYYY</code>. Phone: 80% mobile, 20% landline. Allergy note written for 90% of allergic patients (free-text templates); half of the others get <code>NKDA</code> / <code>NIL</code>.</td></tr>
+<tr><td>Modern registration</td><td>One EHR record per person (the EHR is one database for Branch B and Branch C). 6% spelling variant. Allergy array filled for only 55% of allergic patients. Conditions coded with ICD-10.</td></tr>
+<tr><td>Notes</td><td>One per inpatient stay, built from symptom, finding, imaging and outcome phrases per condition. Half of legacy notes are upper case, as old systems wrote them.</td></tr>
+<tr><td>Imaging plan</td><td>168 studies: 120 chest X-ray, 30 chest CT, 18 brain MRI, taken from visits whose condition calls for imaging; the hero's three first. Written to <code>data/out/imaging_plan.csv</code> for <code>data/imaging.py</code>.</td></tr>
+<tr><td>Ground truth</td><td><code>truth_records.csv</code> (record &rarr; true person), <code>truth_summary.json</code> (expected current conflicts). Never loaded into Exasol.</td></tr>
+</tbody></table></div>
+<p><b>ID formats:</b> legacy <code>&lt;branch&gt;/&lt;year&gt;/&lt;6 digits&gt;</code> (<code>BRA/2014/000731</code>), legacy visit <code>&lt;branch&gt;V&lt;yy&gt;&lt;6 digits&gt;</code>; EHR patient <code>&lt;branch&gt;-P-&lt;6 digits&gt;</code> (<code>BRB-P-108842</code>), EHR encounter <code>ENC-&lt;branch&gt;-&lt;yymm&gt;-&lt;5 digits&gt;</code>; note IDs <code>L:&lt;visit&gt;</code> and <code>M:&lt;encounter&gt;</code>; person <code>WC-&lt;6 digits&gt;</code>.</p>
+<p><b>The hero is fixed by hand:</b> person 731, female, born 1958-03-14, mobile 0000012345 (all demo phone numbers are in the undiallable 0000… range), diabetic and hypertensive, penicillin allergy (anaphylaxis 2019). Visits: 2019-06-11 pneumonia in Branch A (6 days, amoxicillin-clavulanate IV caused anaphylaxis, switched to levofloxacin; the discharge summary says so), 2022-02-03 diabetes review in Branch A, 2026-10-26 pneumonia in Branch B (in a bed, draft order amoxicillin-clavulanate 625 mg TDS + paracetamol + metformin, SpO2 89%, 38.6 &deg;C). Her EHR allergy array is deliberately empty.</p>
+
+<h3 id="src-pg"><span class="tag pg">Postgres</span> Legacy HIS (hospital information system)</h3>
+<p>A 2009-era schema: short upper-case names, every date stored as text, allergies as free text. Database <code>branch_a_his</code>, schema <code>his</code>. Read-only login <code>his_reader</code> (USAGE on the schema, SELECT on its tables).</p>
+<div class="tbl"><table>
+<thead><tr><th>Table</th><th>Columns</th><th class="num">Rows</th><th>Quirks</th></tr></thead>
+<tbody>
+<tr><td><code>pat_mstr</code></td><td>pat_no (PK), branch_cd, pat_nm, sex, dob_txt, age_yrs, ph_no, city, reg_dt</td><td class="num">874</td><td>IDs like <code>BRA/2014/000731</code>; <code>dob_txt</code> as <code>14/03/1958</code> or <code>14-03-58</code> or empty; name <code>MEENAKSHI S</code></td></tr>
+<tr><td><code>visit_hdr</code></td><td>visit_no (PK), pat_no, branch_cd, visit_typ, dept_cd, adm_dt, dis_dt, dx_cd, dx_desc, doc_cd</td><td class="num">3,365</td><td>visit_typ IP / OP / ER; dates as <code>DD/MM/YYYY</code> text</td></tr>
+<tr><td><code>alrgy_txt</code></td><td>pat_no, alrgy_note, entry_dt</td><td class="num">507</td><td>Free text: <code>PENICILLIN - ANAPHYLAXIS (2019) - AMOXY-CLAV IV</code>, <code>NKDA</code>, <code>SULPHA</code></td></tr>
+<tr><td><code>dis_summ</code></td><td>visit_no, summ_txt</td><td class="num">2,234</td><td>Discharge summaries, the text that gets embedded</td></tr>
+<tr><td><code>rx_line</code></td><td>visit_no, line_no, drug_nm, dose_txt</td><td></td><td>Historical prescriptions (all completed)</td></tr>
+<tr><td><code>lab_rslt</code></td><td>visit_no, test_cd, rslt_val, unit, rslt_dt</td><td></td><td>HbA1c here is how the legacy system "knows" diabetes</td></tr>
+</tbody></table></div>
+
+<h3 id="src-mongo"><span class="tag mg">MongoDB</span> Modern EHR (electronic health record)</h3>
+<p>FHIR-flavoured documents with the clinical facts nested inside. Database <code>ehr</code>, collections <code>patients</code> (735) and <code>encounters</code> (2,605, of which 47 are <code>in-progress</code>: a patient in a bed now). Index on <code>encounters.patientId</code>. Read-only user <code>ehr_reader</code> (role <code>read</code> on <code>ehr</code>), created in the <code>admin</code> database, which is why the connection string says <code>authSource=admin</code>.</p>
+<pre><code><span class="c">// ehr.patients (shape)</span>
+{ "_id": "BRB-P-108842", "mrn": "...",
+  "name": { "given": "Meenakshi", "family": "Sundaram", "text": "Meenakshi Sundaram" },
+  "gender": "female", "birthDate": "1958-03-14",
+  "telecom": { "mobile": "+91 0000012345" }, "address": { "city": "City B", "state": "State B" },
+  "homeBranch": "BRB", "registeredAt": "...",
+  "allergies":  [ { "substance": "...", "reaction": "...", "severity": "...", "recorded": "..." } ],   <span class="c">// empty for her</span>
+  "conditions": [ { "code": "E11.9", "display": "Type 2 diabetes mellitus", "onset": "..." } ] }
+
+<span class="c">// ehr.encounters (shape): today's admission</span>
+{ "_id": "ENC-BRB-2610-02605", "patientId": "BRB-P-108842", "branch": "BRB",
+  "class": "inpatient", "department": "Pulmonology", "admitted": "2026-10-26T..", "discharged": null,
+  "status": "in-progress", "diagnosis": { "code": "J18.9", "display": "Pneumonia, unspecified organism" },
+  "medications":  [ { "name": "Amoxicillin-clavulanate", "dose": "625 mg TDS", "status": "draft" }, ... ],
+  "observations": [ { "code": "SpO2", "value": 89, "unit": "%" }, { "code": "Temp", "value": 38.6, "unit": "C" } ],
+  "note": "68-year-old woman, known diabetic ... No known drug allergies recorded at this site." }</code></pre>
+
+<h3 id="src-s3"><span class="tag s3">S3</span> PACS (picture archiving and communication system)</h3>
+<p>Bucket <code>&lt;your-bucket&gt;</code> in <code>ap-south-1</code>. Three prefixes:</p>
+<div class="tbl"><table>
+<thead><tr><th>Key pattern</th><th>What</th><th>Read by</th></tr></thead>
+<tbody>
+<tr><td><code>pacs/&lt;branch&gt;/&lt;StudyInstanceUID&gt;/&lt;SOPInstanceUID&gt;.dcm</code></td><td>168 DICOM files, 139 MB. Uncompressed (Explicit VR Little Endian), 12 bits stored in 16, downsampled to at most 768 px.</td><td>The browser (by signed link) and the console's live render</td></tr>
+<tr><td><code>thumbs/&lt;SOPInstanceUID&gt;.png</code></td><td>One 420 px preview per study, made from the same pixels when the study was archived</td><td>The browser, by signed link</td></tr>
+<tr><td><code>index/dicom_index.csv</code> (+ <code>.parquet</code>)</td><td>The header index: one row per study with the DICOM tags and the file's key</td><td>Exasol, on every imaging query</td></tr>
+</tbody></table></div>
+<p>The index columns are <code>PATIENT_ID, PATIENT_NAME, PATIENT_BIRTH_DATE, PATIENT_SEX, STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, SOP_INSTANCE_UID, ACCESSION_NUMBER, MODALITY, BODY_PART, STUDY_DESCRIPTION, STUDY_DATE, INSTITUTION, REFERRING_PHYSICIAN, MANUFACTURER, ROWS_PX, COLS_PX, FILE_BYTES, S3_KEY, THUMB_KEY</code>. A real PACS keeps exactly this kind of index (the DICOM query layer) beside the files.</p>
+<p>How the imaging system wrote the patient ID matters: Branch A's scanners write the legacy record number with the slashes removed (<code>BRA2014000731</code>), Branch B's write the EHR record number (<code>BRB-P-108842</code>). So her studies sit under two different IDs, and the patient index has to connect them (section 09).</p>
+<h4>How the archive was built (<code>data/imaging.py</code>)</h4>
+<ol class="steps">
+<li>List candidate series from the TCIA public API (<code>services.cancerimagingarchive.net/nbia-api/services/v1</code>): COVID-19-AR chest X-rays (DX/CR, body part CHEST) and chest CTs; UPENN-GBM brain MRIs (T1 with gadolinium where available).</li>
+<li>For each planned study, take one series deterministically and download the middle image of it (<code>getSingleImage</code>). A series that will not decode is skipped (up to 6 tries).</li>
+<li>Convert pixels for display: middle frame of multi-frame data, VOI LUT, clip to the 0.5–99.5 percentiles, invert MONOCHROME1.</li>
+<li>Relabel every identifying tag to the synthetic patient: PatientID, PatientName, birth date, sex, all dates and times, institution, study description, body part, accession number (<code>&lt;branch&gt;&lt;yymmdd&gt;&lt;seq&gt;</code>), referring physician, new Study/Series/SOP UIDs, <code>PatientIdentityRemoved = YES</code>, a de-identification note. Pixel data is kept.</li>
+<li>Write the DICOM at most 768 px, 12 bits stored in 16, uncompressed, window 2048/4096; write a 420 px 8-bit PNG.</li>
+<li>Build the index by reading the written files back with pydicom (<code>stop_before_pixels=True</code>), so the index is exactly what the headers say. Write it as Parquet and as headerless CSV.</li>
+<li>Upload with the admin AWS profile: <code>.dcm</code> as <code>application/dicom</code>, <code>.png</code> as <code>image/png</code>, then the two index files.</li>
+</ol>
+<div class="tbl"><table>
+<thead><tr><th>Modality</th><th class="num">Branch A</th><th class="num">Branch B</th><th class="num">Branch C</th><th class="num">Total</th><th class="num">MB</th></tr></thead>
+<tbody>
+<tr><td>DX (X-ray)</td><td class="num">41</td><td class="num">35</td><td class="num">30</td><td class="num">106</td><td class="num">105.1</td></tr>
+<tr><td>CR (X-ray)</td><td class="num">5</td><td class="num">6</td><td class="num">3</td><td class="num">14</td><td class="num">13.9</td></tr>
+<tr><td>CT</td><td class="num">9</td><td class="num">6</td><td class="num">15</td><td class="num">30</td><td class="num">15.3</td></tr>
+<tr><td>MR</td><td class="num">9</td><td class="num">7</td><td class="num">2</td><td class="num">18</td><td class="num">4.2</td></tr>
+<tr><td><b>All</b></td><td class="num">64</td><td class="num">54</td><td class="num">50</td><td class="num">168</td><td class="num">138.5</td></tr>
+</tbody></table></div>
+<p>Her studies: a 2017 brain MRI (Branch A), a 2019 chest X-ray (Branch A), today's chest X-ray (Branch B, acquired, not yet reported). The MRI is a single slice from a multi-sequence series, which is why its preview looks like a mosaic. Read access is the IAM user <code>hc-s3-reader</code> with exactly <code>s3:GetObject</code> on the bucket's objects and <code>s3:ListBucket</code> + <code>s3:GetBucketLocation</code> on the bucket.</p>
+</section>
+
+<!-- ======================================================= 04 -->
+<section id="connect">
+<h2><span class="n">04</span>How Exasol connects</h2>
+<p>Exasol reaches outside systems through three building blocks. Each is a database object, so access to it is granted and audited like any other object.</p>
+<div class="two">
+  <div class="card"><h4>CONNECTION</h4><p>A named, stored address plus credentials. Users can be allowed to <i>use</i> a connection without ever seeing the secret inside it.</p></div>
+  <div class="card"><h4>Adapter script</h4><p>A program (Java for Postgres, Rust for MongoDB) that runs inside Exasol. It answers two questions: what tables exist at the source, and how to fetch what a query needs.</p></div>
+  <div class="card"><h4>Virtual schema</h4><p>A schema whose tables look local but have no data. Every query against it is handed to the adapter, which rewrites it into a fetch from the source.</p></div>
+</div>
+<h3>The connections in this demo</h3>
+<div class="tbl"><table>
+<thead><tr><th>Connection</th><th>Target</th><th>Login</th><th>Used by</th></tr></thead>
+<tbody>
+<tr><td><code>HOSP_LEGACY_PG</code></td><td><code>jdbc:postgresql://10.88.0.1:55432/branch_a_his</code></td><td><code>his_reader</code> (SELECT only)</td><td>Virtual schema <code>HOSP_LEGACY</code></td></tr>
+<tr><td><code>HOSP_MODERN_MONGO</code></td><td><code>mongodb://10.88.0.1:37017/?authSource=admin&amp;directConnection=true</code></td><td><code>ehr_reader</code> (read on <code>ehr</code>)</td><td>Virtual schemas <code>HOSP_EHR_PATIENTS</code>, <code>HOSP_EHR_ENCOUNTERS</code></td></tr>
+<tr><td><code>HOSP_S3</code></td><td><code>https://&lt;your-bucket&gt;.s3.ap-south-1.amazonaws.com</code></td><td>IAM user <code>hc-s3-reader</code> (access key)</td><td><code>IMPORT … FROM CSV AT HOSP_S3</code> inside the imaging view</td></tr>
+</tbody></table></div>
+<p>All three are read-only at the source. Even an administrator in Exasol cannot change a patient record through them.</p>
+
+<h3>Where the code that runs the connectors lives</h3>
+<p>Adapter scripts need a language runtime and their libraries. Exasol keeps both in <b>BucketFS</b>, its replicated file system, and runs them in <b>script-language containers</b> (SLCs).</p>
+<div class="tbl"><table>
+<thead><tr><th>Piece</th><th>Path</th><th>How it got there</th></tr></thead>
+<tbody>
+<tr><td>Java SLC</td><td>registered as language <code>JAVA</code></td><td><code>exasol slc install JAVA --auto-approve</code> (restarts the database)</td></tr>
+<tr><td>Postgres adapter + JDBC driver</td><td><code>/buckets/bfsdefault/default/hospital/jars/virtual-schema-dist-14.0.4-postgresql-4.0.1.jar</code>, <code>postgresql-42.7.4.jar</code></td><td>Copied by <code>setup/02_sources.sh</code></td></tr>
+<tr><td>JDBC driver for the loader</td><td><code>…/vm-shared/exa/jdbc/postgresql/</code> + <code>settings.cfg</code></td><td>See the note below</td></tr>
+<tr><td>Rust SLC 0.23.0 (aarch64)</td><td><code>bfsdefault/default/slc/rustslc</code>, registered as language <code>RUST</code> in <code>SCRIPT_LANGUAGES</code></td><td>Copied by hand by <code>setup/01_mongo_vs.sh</code> (not in the SLC catalog)</td></tr>
+<tr><td>MongoDB adapter library</td><td><code>bfsdefault/rust/libmongodb_vs.so</code></td><td>Built from <code>exasol-labs/exasol-mongodb-vs</code>; scripts <code>MONGODB_VS.MONGODB_ADAPTER</code> (adapter) and <code>MONGODB_VS.MONGODB_SCAN</code> (UDF)</td></tr>
+</tbody></table></div>
+<div class="note warn"><b>Two driver locations.</b> The adapter itself loads the JDBC driver from BucketFS. But the actual data fetch is run by Exasol's own loader as <code>IMPORT FROM JDBC</code>, and on this Personal build the loader reads drivers from <code>etlJdbcConfigDir</code>, which is the VM-shared <code>exa/jdbc</code> directory, not BucketFS <code>drivers/jdbc</code> as the documentation says. Without that copy, metadata works and every query fails.</div>
+</section>
+
+<!-- ======================================================= 05 -->
+<section id="vs-pg">
+<h2><span class="n">05</span>Virtual schema: Postgres (legacy HIS)</h2>
+<p>The official Exasol PostgreSQL virtual schema (JDBC dialect 4.0.1 on the virtual-schema framework 14.0.4).</p>
+<pre><code>CREATE OR REPLACE JAVA ADAPTER SCRIPT HOSP_ADAPTERS.POSTGRES_ADAPTER AS
+  %scriptclass com.exasol.adapter.RequestDispatcher;
+  %jvmoption -Duser.timezone=UTC;                       <span class="c">-- without it, DATE values shift by the VM's offset</span>
+  %jar /buckets/bfsdefault/default/hospital/jars/virtual-schema-dist-14.0.4-postgresql-4.0.1.jar;
+  %jar /buckets/bfsdefault/default/hospital/jars/postgresql-42.7.4.jar;
+/
+CREATE VIRTUAL SCHEMA HOSP_LEGACY USING HOSP_ADAPTERS.POSTGRES_ADAPTER WITH
+  CONNECTION_NAME = 'HOSP_LEGACY_PG'  CATALOG_NAME = 'branch_a_his'  SCHEMA_NAME = 'his'
+  POSTGRESQL_IDENTIFIER_MAPPING = 'CONVERT_TO_UPPER';   <span class="c">-- his.pat_mstr appears as HOSP_LEGACY.PAT_MSTR</span></code></pre>
+<h3>What happens when it is created</h3>
+<p>Exasol calls the adapter with a <i>create</i> request. The adapter connects with the JDBC driver, reads Postgres's catalog for schema <code>his</code>, and returns the table and column list with Exasol types (<code>VARCHAR(20)</code>, <code>DECIMAL(5,0)</code> and so on). Exasol stores that metadata. No rows are read. If the Postgres schema changes, <code>ALTER VIRTUAL SCHEMA HOSP_LEGACY REFRESH</code> re-reads it.</p>
+<h3>What happens on every query</h3>
+<ol class="steps">
+<li>Exasol parses the SQL and finds the part that touches <code>HOSP_LEGACY</code> tables.</li>
+<li>It sends the adapter a <i>pushdown request</i>: a JSON description of that part (tables, needed columns, filters, the adapter's capabilities).</li>
+<li>The adapter writes Postgres SQL for as much as Postgres can do (column selection, filters, <code>LIKE</code>, joins inside the same source, aggregates where allowed) and wraps it in an <code>IMPORT FROM JDBC</code> statement.</li>
+<li>Exasol's loader runs that statement: it opens a JDBC connection with the stored credentials, executes the SQL on Postgres and streams the rows in parallel.</li>
+<li>Exasol joins the result with everything else in the query (MongoDB data, the patient index) in memory.</li>
+</ol>
+<p>A real example: the hero's allergy note. <code>EXPLAIN VIRTUAL</code> shows exactly what Postgres received:</p>
+<pre><code>IMPORT INTO (c1 VARCHAR(20) UTF8, c2 VARCHAR(2000000) UTF8) FROM JDBC AT HOSP_LEGACY_PG
+STATEMENT 'SELECT "s"."visit_no", "s"."summ_txt" FROM "his"."dis_summ" "s"
+           WHERE "s"."summ_txt" LIKE E''%ANAPHYLAXIS%'''          <span class="c">-- the filter ran in Postgres</span>
+
+IMPORT INTO (c1 VARCHAR(20) UTF8, c2 VARCHAR(20) UTF8, c3 VARCHAR(10) UTF8) FROM JDBC AT HOSP_LEGACY_PG
+STATEMENT 'SELECT "v"."visit_no", "v"."pat_no", "v"."adm_dt" FROM "his"."visit_hdr" "v"'
+                                                                   <span class="c">-- only 3 columns; the join to the patient index ran in Exasol</span></code></pre>
+<p>Only the needed columns cross the wire, and filters run at the source. A join between a source table and something that lives in Exasol (here the patient index) cannot be pushed, so Exasol fetches the narrow column set and joins locally. The console's "For engineers" panel shows this live for questions 1, 2, 5 and 6.</p>
+<div class="note"><b>Function support matters.</b> The dialect pushes many expressions down. <code>REGEXP_LIKE</code> is one of them, but Postgres has no such function, so the query fails at the source. The typed views therefore use <code>LIKE</code> on legacy columns, and keep <code>REGEXP_SUBSTR</code> for parts the adapter evaluates in Exasol.</div>
+</section>
+
+<!-- ======================================================= 06 -->
+<section id="vs-mongo">
+<h2><span class="n">06</span>Virtual schema: MongoDB (modern EHR)</h2>
+<p>The Exasol Labs MongoDB virtual schema, written in Rust. One virtual schema per collection:</p>
+<pre><code>CREATE VIRTUAL SCHEMA HOSP_EHR_PATIENTS USING MONGODB_VS.MONGODB_ADAPTER WITH
+  MONGODB_CONNECTION = 'HOSP_MODERN_MONGO' DATABASE = 'ehr' COLLECTION = 'patients'   INFERENCE_SAMPLE_SIZE = '2000';
+CREATE VIRTUAL SCHEMA HOSP_EHR_ENCOUNTERS USING MONGODB_VS.MONGODB_ADAPTER WITH
+  MONGODB_CONNECTION = 'HOSP_MODERN_MONGO' DATABASE = 'ehr' COLLECTION = 'encounters' INFERENCE_SAMPLE_SIZE = '3000';</code></pre>
+<h3>From documents to tables</h3>
+<p>MongoDB has no fixed schema, so at creation the adapter <b>samples</b> up to <code>INFERENCE_SAMPLE_SIZE</code> documents and infers one. Nested parts become related tables:</p>
+<div class="tbl"><table>
+<thead><tr><th>In the document</th><th>In Exasol</th><th>How to join</th></tr></thead>
+<tbody>
+<tr><td>Top-level fields</td><td><code>PATIENTS</code>: <code>gender</code>, <code>birthDate</code>, <code>homeBranch</code>…</td><td>One row per document</td></tr>
+<tr><td>The document's own <code>_id</code></td><td><code>mongo_id</code> (the real ID, e.g. <code>BRB-P-108842</code>)</td><td>Use this as the record ID</td></tr>
+<tr><td>Nested object <code>name</code></td><td>Table <code>PATIENTS_name</code> (given, family, text); parent column <code>name|object</code></td><td><code>PATIENTS_name._id = PATIENTS."name|object"</code></td></tr>
+<tr><td>Array <code>allergies</code></td><td>Table <code>PATIENTS_allergies_arr</code> with <code>_parent</code> and <code>_pos</code>; parent column <code>allergies|array</code> holds the element count</td><td><code>_arr._parent = PATIENTS._id</code></td></tr>
+<tr><td>Missing or empty value</td><td>Extra flag columns <code>field|empty</code>, <code>field|n</code></td><td></td></tr>
+<tr><td>Whole original document</td><td><code>__mongodb_source_json</code></td><td>For anything the inference did not model</td></tr>
+</tbody></table></div>
+<div class="note warn"><b>Two different IDs.</b> The table column <code>_id</code> is a generated hash key used only to join the family of tables. The MongoDB document ID is in <code>mongo_id</code>. And <code>allergies|array</code> is a count, not a key. The typed views in <code>HOSP_SRC</code> hide all of this.</div>
+<p>Tables produced: <code>PATIENTS</code>, <code>PATIENTS_name</code>, <code>PATIENTS_telecom</code>, <code>PATIENTS_address</code>, <code>PATIENTS_allergies_arr</code>, <code>PATIENTS_conditions_arr</code>; <code>ENCOUNTERS</code>, <code>ENCOUNTERS_diagnosis</code>, <code>ENCOUNTERS_medications_arr</code>, <code>ENCOUNTERS_observations_arr</code>. Names are case-sensitive, so they are double-quoted in SQL.</p>
+<h3>What happens on every query</h3>
+<p>Unlike Postgres, MongoDB does not speak SQL, so the adapter does not write a statement for the source. It answers the pushdown request with a call to a <b>scan UDF</b> that runs inside Exasol. The UDF gets a JSON plan, connects to MongoDB with the stored credentials, runs a <code>find</code> with the filter applied in MongoDB, and emits rows. A real plan for "encounters in progress":</p>
+<pre><code>SELECT "mongo_id", "status" FROM (
+  SELECT MONGODB_VS.MONGODB_SCAN('{
+    "connection_name": "HOSP_MODERN_MONGO", "database": "ehr", "collection": "encounters",
+    "plan": { "kind": "root_find" },
+    "columns": [ { "source": {"kind":"field","name":"_id"},    "exasol_name": "mongo_id" },
+                 { "source": {"kind":"field","name":"status"}, "exasol_name": "status" } ],
+    "batch_size": 128,
+    "pushdown": { "prefilter": { "kind":"compare", "op":"equal", "column":"status",
+                                 "literal": {"kind":"string","value":"in-progress"} } },
+    "inference_fingerprint": "c465f23a…" }')
+  EMITS ("mongo_id" VARCHAR(2000000), "status" VARCHAR(2000000)))</code></pre>
+<p>Only the two needed fields are projected, and <code>status = 'in-progress'</code> becomes a MongoDB filter. The <code>inference_fingerprint</code> ties the plan to the inferred schema, so a stale schema is detected rather than silently misread.</p>
+</section>
+
+<!-- ======================================================= 07 -->
+<section id="s3">
+<h2><span class="n">07</span>Reading S3 in place</h2>
+<p>For the PACS no virtual schema is needed: Exasol's <code>IMPORT</code> can read a file straight from S3, and putting it inside a view makes it read on every query.</p>
+<pre><code>CREATE OR REPLACE VIEW HOSP_SRC.IMAGING_INDEX AS
+SELECT * FROM (
+  IMPORT INTO (PATIENT_ID VARCHAR(40), PATIENT_NAME VARCHAR(80), … , S3_KEY VARCHAR(200), THUMB_KEY VARCHAR(120))
+  FROM CSV AT HOSP_S3 FILE 'index/dicom_index.csv');
+
+CREATE OR REPLACE VIEW HOSP_CORE.IMAGING_STUDIES AS          <span class="c">-- typed, and tied to a person</span>
+SELECT m.UNIFIED_ID, i.PATIENT_ID AS PACS_PATIENT_ID, …, TO_DATE(i.STUDY_DATE, 'YYYYMMDD') AS STUDY_DATE, i.S3_KEY, i.THUMB_KEY
+FROM HOSP_SRC.IMAGING_INDEX i LEFT JOIN HOSP_CORE.MPI m ON m.PACS_PATIENT_ID = i.PATIENT_ID;</code></pre>
+<p>Per query, S3 receives one signed GET for <code>index/dicom_index.csv</code> (about 0.3 s). The DICOM files are never read by the database: Exasol works on metadata only, and the image itself is fetched by the viewer. Section 12 explains both reads and shows one row of the index.</p>
+<div class="note warn"><b>CSV, not Parquet.</b> A Parquet copy of the index sits beside the CSV. On this Personal build the Parquet reader adds a fixed ~12 s to every request to an <code>amazonaws.com</code> host (even for a missing file), so the view reads the CSV. Worth reporting to Exasol.</div>
+</section>
+
+<!-- ======================================================= 08 -->
+<section id="model">
+<h2><span class="n">08</span>Data model in Exasol</h2>
+<h3>HOSP_SRC: one vocabulary over both systems</h3>
+<p>Typed views, nothing stored. Each one reads a virtual schema and turns it into the same columns, whichever system it came from.</p>
+<div class="tbl"><table>
+<thead><tr><th>View</th><th>From</th><th>Main transformations</th></tr></thead>
+<tbody>
+<tr><td><code>LEGACY_PATIENTS</code></td><td><span class="tag pg">PAT_MSTR</span></td><td>Splits <code>MEENAKSHI S</code> into given name and surname or initial; parses <code>DD/MM/YYYY</code> and <code>DD-MM-YY</code> (pivot year 27); adds <code>BIRTH_DATE_SWAPPED</code> (the same text read month-first when day &le; 12); keeps a phone only if it is a 10-digit mobile starting 6–9</td></tr>
+<tr><td><code>LEGACY_ENCOUNTERS</code></td><td><span class="tag pg">VISIT_HDR</span></td><td>IP/OP/ER &rarr; inpatient/outpatient/emergency; department codes to names; text dates to DATE</td></tr>
+<tr><td><code>LEGACY_ALLERGIES</code></td><td><span class="tag pg">ALRGY_TXT</span></td><td>Free text &rarr; drug class (PENICILLIN, SULFONAMIDE, NSAID, CEPHALOSPORIN) and severity (anaphylaxis, Stevens-Johnson, angioedema, bronchospasm = severe); drops NKDA / NIL</td></tr>
+<tr><td><code>LEGACY_MEDICATIONS</code></td><td><span class="tag pg">RX_LINE + VISIT_HDR</span></td><td>Historical orders, status completed</td></tr>
+<tr><td><code>MODERN_PATIENTS</code></td><td><span class="tag mg">PATIENTS + name, telecom, address</span></td><td>Joins the object tables; last 10 digits of the mobile; <code>ALLERGIES_RECORDED</code> = array count</td></tr>
+<tr><td><code>MODERN_CONDITIONS</code>, <code>MODERN_ALLERGIES</code></td><td><span class="tag mg">*_arr</span></td><td>Arrays to rows; allergy substance &rarr; drug class</td></tr>
+<tr><td><code>MODERN_ENCOUNTERS</code>, <code>MODERN_MEDICATIONS</code>, <code>MODERN_OBSERVATIONS</code></td><td><span class="tag mg">ENCOUNTERS + children</span></td><td>ISO timestamps to DATE; orders keep draft / active / completed</td></tr>
+<tr><td><code>ALL_ENCOUNTERS</code>, <code>ALL_ALLERGIES</code>, <code>ALL_MEDICATIONS</code></td><td>both</td><td><code>UNION ALL</code> of the two shapes</td></tr>
+<tr><td><code>IMAGING_INDEX</code></td><td><span class="tag s3">S3 CSV</span></td><td>See section 07</td></tr>
+</tbody></table></div>
+<h3>HOSP_CORE: the fused picture</h3>
+<div class="tbl"><table>
+<thead><tr><th>Object</th><th>Kind</th><th>Grain and purpose</th></tr></thead>
+<tbody>
+<tr><td><code>PATIENT_RECORDS</code></td><td>table</td><td>Every patient record from both systems (1,609), snapshot for matching</td></tr>
+<tr><td><code>MATCH_CANDIDATES</code></td><td>table</td><td>Scored record pairs with a reason</td></tr>
+<tr><td><code>MPI</code></td><td>table</td><td>One row per record: <code>UNIFIED_ID</code>, <code>RECORD_ID</code>, <code>PACS_PATIENT_ID</code>, <code>LINK_SCORE</code>, <code>MATCH_REASON</code></td></tr>
+<tr><td><code>MATCH_REVIEW_QUEUE</code></td><td>view</td><td>Pairs scoring 55–69 for a person to decide (8 today)</td></tr>
+<tr><td><code>DRUG_CLASS</code></td><td>table</td><td>Formulary lookup: drug &rarr; class (amoxicillin-clavulanate &rarr; PENICILLIN …)</td></tr>
+<tr><td><code>ENCOUNTERS</code>, <code>ALLERGIES</code>, <code>MEDICATIONS</code></td><td>views</td><td>The <code>ALL_*</code> views joined to the MPI, so every row has a <code>UNIFIED_ID</code></td></tr>
+<tr><td><code>DIABETIC_PATIENTS</code></td><td>view</td><td>Diabetic in either system: EHR condition E11*, or a legacy HbA1c test</td></tr>
+<tr><td><code>ALLERGY_CONFLICTS</code></td><td>view</td><td>The safety check (section 10)</td></tr>
+<tr><td><code>READMISSIONS_30D</code></td><td>view</td><td>The certified readmission definition (section 10)</td></tr>
+<tr><td><code>NOTE_INDEX</code>, <code>NOTE_VECTORS</code>, <code>NOTES</code></td><td>tables + view</td><td>Note keys, 1,526,784 vector rows, notes tied to people</td></tr>
+<tr><td><code>IMAGING_STUDIES</code></td><td>view</td><td>Header index tied to people</td></tr>
+<tr><td><code>PATIENT_SUMMARY</code></td><td>view</td><td>One row per person: name, sex, birth date, systems, branches, record IDs</td></tr>
+</tbody></table></div>
+<p>Also: <code>HOSP_GOV</code> (section 13), <code>HOSP_ACCEL</code> (section 15), <code>HOSP_CONSOLE.AGENT_AUDIT</code> (section 16) and <code>HOSP_ADAPTERS</code> (the Postgres adapter script).</p>
+<h3 id="counts">Row counts (measured 28 October 2026)</h3>
+<div class="tbl"><table>
+<thead><tr><th>Object</th><th>Split</th><th class="num">Rows</th></tr></thead>
+<tbody>
+<tr><td><code>his.pat_mstr</code></td><td>Branch A + Branch C legacy registrations</td><td class="num">874</td></tr>
+<tr><td><code>his.visit_hdr</code></td><td>IP 2,234 · OP 917 · ER 214</td><td class="num">3,365</td></tr>
+<tr><td><code>his.alrgy_txt</code></td><td>of which 133 are real allergies after dropping NKDA / NIL</td><td class="num">507</td></tr>
+<tr><td><code>his.dis_summ</code></td><td>one per legacy inpatient stay</td><td class="num">2,234</td></tr>
+<tr><td><code>his.rx_line</code></td><td>historical orders (all completed)</td><td class="num">7,159</td></tr>
+<tr><td><code>ehr.patients</code></td><td>Branch B + Branch C</td><td class="num">735</td></tr>
+<tr><td><code>ehr.encounters</code></td><td>inpatient 1,742 (47 in a bed) · outpatient 697 · emergency 166</td><td class="num">2,605</td></tr>
+<tr><td>EHR medication orders</td><td>completed 5,369 · active 112 · draft 2</td><td class="num">5,483</td></tr>
+<tr><td>EHR allergies</td><td>array elements</td><td class="num">62</td></tr>
+<tr><td><code>PATIENT_RECORDS</code></td><td>legacy 874 · modern 735; by branch BRA 516 · BRB 535 · BRC 558</td><td class="num">1,609</td></tr>
+<tr><td><code>MATCH_CANDIDATES</code></td><td>&ge; 70 link 443 · 55–69 review 8 · below 55: 14,814</td><td class="num">15,265</td></tr>
+<tr><td><code>MPI</code></td><td>1,224 people; 340 of them have more than one record</td><td class="num">1,609</td></tr>
+<tr><td><code>DIABETIC_PATIENTS</code></td><td>either system</td><td class="num">320</td></tr>
+<tr><td><code>NOTE_INDEX</code></td><td>legacy 2,234 · modern 1,742</td><td class="num">3,976</td></tr>
+<tr><td><code>NOTE_VECTORS</code></td><td>3,976 &times; 384</td><td class="num">1,526,784</td></tr>
+<tr><td><code>HOSP_ACCEL.ENCOUNTERS</code></td><td>legacy 3,365 · modern 2,605</td><td class="num">5,970</td></tr>
+<tr><td><code>READMISSIONS_30D</code></td><td>148 invisible to one system (BRB 46/163 · BRA 52/161 · BRC 50/138)</td><td class="num">462</td></tr>
+<tr><td><code>ALLERGY_CONFLICTS</code></td><td>all with <code>KNOWN_WHERE_PRESCRIBED = FALSE</code></td><td class="num">3</td></tr>
+<tr><td><code>DRUG_CLASS</code> · <code>ACCESS_MAP</code></td><td></td><td class="num">8 · 3</td></tr>
+<tr><td>S3 index</td><td>see section 03</td><td class="num">168</td></tr>
+</tbody></table></div>
+<p>The ground truth has 1,200 people and 456 true same-person record pairs; the index links 431 pairs, all correct (precision 430/430 = 100%, recall 430/456 = 94.3%). It shows 1,224 people rather than 1,200: 24 extra IDs come from records of the same person the rules left apart (25 missed pairs) rather than risk a wrong merge.</p>
+</section>
+
+<!-- ======================================================= 09 -->
+<section id="mpi">
+<h2><span class="n">09</span>Patient index (MPI)</h2>
+<p>The master patient index decides which records are the same person. It is plain SQL with deterministic rules (<code>sql/20_mpi.sql</code>): no model, nothing to train, and a written reason on every link.</p>
+<ol class="steps">
+<li><b>Collect.</b> <code>PATIENT_RECORDS</code> = every legacy and modern patient record, read live through the typed views (874 + 735 = 1,609).</li>
+<li><b>Block.</b> Only compare pairs that share sex <i>and</i> one strong key (the given name sounds alike, the same mobile, or the same birth date). Pairs inside the EHR, and legacy pairs within the same branch, are skipped. This keeps the comparison far smaller than a full cross join.</li>
+<li><b>Score</b> each pair:
+<div class="tbl"><table>
+<thead><tr><th>Signal</th><th>Points</th></tr></thead>
+<tbody>
+<tr><td>Given name exact / sounds alike (SOUNDEX) or within 2 edits</td><td class="num">25 / 15</td></tr>
+<tr><td>Surname exact (more than an initial) / same first letter / differs</td><td class="num">15 / 10 / &minus;15</td></tr>
+<tr><td>Birth date exact / day and month swapped / no date but age within 1 year</td><td class="num">35 / 25 / 10</td></tr>
+<tr><td>Mobile exact</td><td class="num">30</td></tr>
+</tbody></table></div></li>
+<li><b>Decide.</b> Score &ge; 70: linked automatically. 55–69: <code>MATCH_REVIEW_QUEUE</code>, never auto-linked. Below 55: different people.</li>
+<li><b>Anchor.</b> The modern EHR record anchors the person. A legacy record joins its best-scoring modern record; a legacy record whose twin at another branch is linked to a modern record follows it (transitive). People with no modern record are anchored on their lowest legacy ID.</li>
+<li><b>Number.</b> <code>UNIFIED_ID = 'UP-' || LPAD(DENSE_RANK() OVER (ORDER BY anchor), 6, '0')</code>. Also <code>PACS_PATIENT_ID = REPLACE(RECORD_ID, '/', '')</code>, which is how the scanners write the ID into DICOM.</li>
+</ol>
+<p><b>The hero:</b> <code>BRA/2014/000731</code> (<code>MEENAKSHI S</code>, <code>14/03/1958</code>) &harr; <code>BRB-P-108842</code> (<code>Meenakshi Sundaram</code>, <code>1958-03-14</code>) scores 25 + 10 + 35 + 30 = <b>100</b>: "given name exact · surname initial agrees · birth date exact · mobile exact". Her DICOM files tagged <code>BRA2014000731</code> and <code>BRB-P-108842</code> both resolve to the same <code>UNIFIED_ID</code>.</p>
+<p><b>Measured quality</b> (<code>data/check_mpi.py</code> against the truth file): 1,609 records &rarr; 1,224 people, precision 100% (no wrong merge), recall 94.3% (the rest are records the rules deliberately leave apart, several of them in the review queue). In a hospital, a wrong merge is worse than a missed link, so the threshold is set for precision.</p>
+<p><b>Refresh.</b> The index is a stored table built from live data. In this demo it is built at set-up; in production it would rebuild nightly or on each new registration. Everything else reads it live.</p>
+</section>
+
+<!-- ======================================================= 10 -->
+<section id="logic">
+<h2><span class="n">10</span>Clinical rules</h2>
+<h3>The allergy safety check (<code>HOSP_CORE.ALLERGY_CONFLICTS</code>)</h3>
+<pre><code>SELECT o.UNIFIED_ID, o.ENCOUNTER_ID, o.SOURCE_SYSTEM AS PRESCRIBED_IN, o.DRUG, o.DOSE, o.ORDER_STATUS, o.DRUG_CLASS,
+       a.ALLERGY_AS_RECORDED, a.SEVERITY, a.SOURCE_SYSTEM AS ALLERGY_RECORDED_IN,
+       CASE WHEN a.RECORD_ID = o.RECORD_ID THEN TRUE ELSE FALSE END AS KNOWN_WHERE_PRESCRIBED
+FROM HOSP_CORE.MEDICATIONS o                                   <span class="c">-- orders from BOTH systems, + drug class</span>
+JOIN HOSP_CORE.ALLERGIES a ON a.UNIFIED_ID = o.UNIFIED_ID       <span class="c">-- same PERSON, any system</span>
+                           AND a.DRUG_CLASS = o.DRUG_CLASS
+WHERE o.ORDER_STATUS IN ('draft', 'active');</code></pre>
+<p><code>KNOWN_WHERE_PRESCRIBED = FALSE</code> means the allergy is filed under a different record than the order, so the prescribing system had no way to see it. Today: 3 patients in a bed have such an order (Meenakshi Sundaram and Usha Kulkarni, registered in Branch B, and Thomas Patil in Branch C), and in all 3 cases the allergy is only in the legacy system.</p>
+<h3>30-day readmission (<code>HOSP_CORE.READMISSIONS_30D</code>)</h3>
+<p>An inpatient admission within 0–30 days of the <b>same person's</b> previous inpatient discharge, at any branch, in any system. Computed with <code>LAG(DISCHARGE_DATE) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE)</code>. <code>VISIBLE_TO_ONE_SYSTEM</code> is true when the previous stay is under the same record ID, meaning a branch system on its own would have counted it. Result: 462 readmissions, 148 of them (32%) invisible to any single system.</p>
+<h3>Diabetes in either system</h3>
+<p>The EHR codes diabetes (<code>E11*</code>); the legacy HIS never did, but it ordered HbA1c tests. <code>DIABETIC_PATIENTS</code> takes either signal, which is how question 4 finds diabetic patients across both systems.</p>
+</section>
+
+<!-- ======================================================= 11 -->
+<section id="vectors">
+<h2><span class="n">11</span>Note vectors and "patients like her"</h2>
+<p>3,976 clinical notes (2,234 legacy discharge summaries + EHR admission notes) were embedded once with <code>BAAI/bge-small-en-v1.5</code> (384 dimensions, via fastembed), normalised to length 1, and stored <b>long and narrow</b>:</p>
+<pre><code>HOSP_CORE.NOTE_INDEX   (NOTE_ID, SOURCE_SYSTEM, RECORD_ID, ENCOUNTER_ID)   <span class="c">-- one row per note</span>
+HOSP_CORE.NOTE_VECTORS (NOTE_ID, DIM, VAL)                                 <span class="c">-- 384 rows per note = 1,526,784 rows</span></code></pre>
+<p>Because the vectors are unit length, cosine similarity is just a dot product, and a dot product is a join plus a <code>GROUP BY</code>. No vector type and no UDF in the hot path:</p>
+<pre><code>WITH q AS (SELECT DIM, VAL FROM HOSP_CORE.NOTE_VECTORS WHERE NOTE_ID = 'M:ENC-BRB-2610-02605'),   <span class="c">-- her note today</span>
+sim AS (SELECT v.NOTE_ID, SUM(v.VAL * q.VAL) AS SIMILARITY
+        FROM HOSP_CORE.NOTE_VECTORS v JOIN q ON q.DIM = v.DIM GROUP BY v.NOTE_ID)
+…  <span class="c">-- then: diabetic in either system, over 60, penicillin allergy in either system, + antibiotic, stay, readmission</span></code></pre>
+<p><b>Load details</b> (<code>data/embed.py</code>): notes are read from <code>data/out/notes.csv</code> (written by the generator from both systems), lower-cased, embedded in batches of 64 as float32, L2-normalised, rounded to 6 decimals, and loaded with pyexasol <code>import_from_pandas</code> (compressed) into <code>NOTE_INDEX (NOTE_ID, SOURCE_SYSTEM, RECORD_ID, ENCOUNTER_ID, MODEL)</code> and <code>NOTE_VECTORS (NOTE_ID VARCHAR(40), DIM DECIMAL(4,0), VAL DOUBLE)</code>. <code>HOSP_CORE.NOTES</code> ties each note to its person through the MPI.</p>
+<p>The note text stays in its source; Exasol keeps only the key and the numbers. For free text typed in the console, the same model embeds the text (about 2 s, in a subprocess of the project's Python environment) and the 384 numbers go into the query as a <code>VALUES</code> list. The whole question takes about 4 s.</p>
+</section>
+
+<!-- ======================================================= 12 -->
+<section id="images">
+<h2><span class="n">12</span>How images are read and shown</h2>
+<p>The rule: <b>the database handles facts about images, never pixels.</b> Exasol finds which files belong to the patient; the bytes go straight from S3 to whoever displays them.</p>
+<h3>Two separate reads: metadata by Exasol, pixels by the viewer</h3>
+<div class="two">
+  <div class="card"><h4>1 &middot; Exasol reads metadata</h4><p>One small file, <code>index/dicom_index.csv</code>, sits next to the images. It has one row per study, holding the values from that DICOM file's header plus the file's S3 location. Exasol reads it live on every query (<code>IMPORT … FROM CSV AT HOSP_S3</code>, one signed GET, about 0.3 s), matches <code>PATIENT_ID</code> to the patient index and returns her rows. It never opens a <code>.dcm</code> file.</p></div>
+  <div class="card"><h4>2 &middot; The viewer reads pixels</h4><p>The console takes <code>S3_KEY</code> / <code>THUMB_KEY</code> from those rows and signs a 15-minute link with the read-only IAM user. The browser downloads the PNG preview straight from S3. For "Render it from the DICOM file now", the console downloads the original <code>.dcm</code> file itself, reads its header with pydicom and turns the pixels into a PNG. Exasol is not involved in either case.</p></div>
+</div>
+<h3 id="find">How Exasol finds which files belong to her</h3>
+<p>A three-step join. Nothing is searched inside the images.</p>
+<ol class="steps">
+<li><b>Start from the person.</b> The patient index says she is <code>UP-000816</code> and lists every record she has: <code>BRA/2014/000731</code> (Branch A, legacy HIS) and <code>BRB-P-108842</code> (Branch B, EHR).</li>
+<li><b>Write each record ID the way the scanners do.</b> When a scanner stores an image, it writes the patient's local record number into the DICOM tag PatientID (0010,0020). Branch A's scanners drop the slashes. The index stores that form in <code>PACS_PATIENT_ID = REPLACE(RECORD_ID, '/', '')</code>, so <code>BRA/2014/000731</code> becomes <code>BRA2014000731</code>.</li>
+<li><b>Match the metadata file.</b> Exasol reads <code>index/dicom_index.csv</code> live and keeps the rows where <code>PATIENT_ID = PACS_PATIENT_ID</code>.</li>
+</ol>
+<pre><code>SELECT m.UNIFIED_ID, m.RECORD_ID, m.PACS_PATIENT_ID, i.PATIENT_ID AS DICOM_TAG, i.STUDY_DATE, i.MODALITY, i.S3_KEY
+FROM   HOSP_CORE.MPI m                                        <span class="c">-- every record of every person</span>
+JOIN   HOSP_SRC.IMAGING_INDEX i ON i.PATIENT_ID = m.PACS_PATIENT_ID   <span class="c">-- the S3 metadata file, read now</span>
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = 'BRB-P-108842')</code></pre>
+<div class="tbl"><table>
+<thead><tr><th>UNIFIED_ID</th><th>Her record</th><th>System</th><th>PatientID in the DICOM file</th><th>Study</th></tr></thead>
+<tbody>
+<tr><td><code>UP-000816</code></td><td><code>BRA/2014/000731</code></td><td><span class="tag pg">legacy</span></td><td><code>BRA2014000731</code></td><td>2017-09-09 MR, MRI brain with and without contrast</td></tr>
+<tr><td><code>UP-000816</code></td><td><code>BRA/2014/000731</code></td><td><span class="tag pg">legacy</span></td><td><code>BRA2014000731</code></td><td>2019-06-11 DX, chest X-ray PA</td></tr>
+<tr><td><code>UP-000816</code></td><td><code>BRB-P-108842</code></td><td><span class="tag mg">EHR</span></td><td><code>BRB-P-108842</code></td><td>2026-10-26 DX, chest X-ray PA</td></tr>
+</tbody></table></div>
+<p>Her images are filed under two different patient IDs, and no single system links them. Because the patient index already knows both records are her, one join finds all three. The same join is inside <code>HOSP_CORE.IMAGING_STUDIES</code>, which is what question 3 and the governed view <code>HOSP_GOV.IMAGING_STUDIES</code> use. The name in the file is not used for matching (<code>MEENAKSHI^S</code> in Branch A, <code>SUNDARAM^MEENAKSHI</code> in Branch B): IDs are reliable, names are not.</p>
+<div class="note warn"><b>What this relies on.</b> Each site's scanners must write a record ID that the patient index knows, possibly reformatted. If a site wrote its own scanner-only ID, that ID would be added to the patient index as one more record to match, using the name, birth date and sex from the DICOM header.</div>
+<p>One row of the metadata file, for her 2019 chest X-ray:</p>
+<div class="tbl"><table>
+<thead><tr><th>Column</th><th>Value</th><th>From the DICOM header tag</th></tr></thead>
+<tbody>
+<tr><td><code>PATIENT_ID</code></td><td><code>BRA2014000731</code></td><td>(0010,0020) PatientID</td></tr>
+<tr><td><code>PATIENT_NAME</code></td><td><code>MEENAKSHI^S</code></td><td>(0010,0010) PatientName</td></tr>
+<tr><td><code>PATIENT_BIRTH_DATE</code></td><td><code>19580314</code></td><td>(0010,0030) PatientBirthDate</td></tr>
+<tr><td><code>STUDY_DATE</code></td><td><code>20190611</code></td><td>(0008,0020) StudyDate</td></tr>
+<tr><td><code>MODALITY</code>, <code>BODY_PART</code></td><td><code>DX</code>, <code>CHEST</code></td><td>(0008,0060) Modality, (0018,0015) BodyPartExamined</td></tr>
+<tr><td><code>STUDY_DESCRIPTION</code></td><td><code>XR CHEST PA</code></td><td>(0008,1030) StudyDescription</td></tr>
+<tr><td><code>INSTITUTION</code></td><td><code>Branch A</code></td><td>(0008,0080) InstitutionName</td></tr>
+<tr><td><code>ACCESSION_NUMBER</code></td><td><code>BRA1906110000</code></td><td>(0008,0050) AccessionNumber</td></tr>
+<tr><td><code>ROWS_PX</code>, <code>COLS_PX</code></td><td><code>676</code>, <code>768</code></td><td>(0028,0010) Rows, (0028,0011) Columns</td></tr>
+<tr><td><code>STUDY/SERIES/SOP_INSTANCE_UID</code></td><td><code>1.2.826.0.1.3680043.8.498…</code></td><td>(0020,000D), (0020,000E), (0008,0018)</td></tr>
+<tr><td><code>FILE_BYTES</code></td><td>about 1 MB</td><td>file size, not a tag</td></tr>
+<tr><td><code>S3_KEY</code></td><td><code>pacs/BRA/&lt;StudyUID&gt;/&lt;SOPUID&gt;.dcm</code></td><td>where the image is</td></tr>
+<tr><td><code>THUMB_KEY</code></td><td><code>thumbs/&lt;SOPUID&gt;.png</code></td><td>where the preview is</td></tr>
+</tbody></table></div>
+<h3>Where the metadata file comes from</h3>
+<p><code>data/imaging.py</code> wrote it once, when the images were archived: for each DICOM file it read the header with pydicom, wrote one CSV row and uploaded the file to S3 (a Parquet copy sits beside it, not used; see section 07). Every real PACS keeps the same list in its own database, so studies can be searched without opening files. In production Exasol would read that list, through a virtual schema on the PACS database, a DICOMweb (QIDO-RS) query or a regular export like this one, instead of a file we generated.</p>
+<h3>Why metadata, not the files</h3>
+<ul>
+<li><b>Fast:</b> one small file answers "which scans belong to her" in 0.3 s. Opening 168 DICOM files (139 MB) on every question would take far longer.</li>
+<li><b>Safe:</b> no pixel data passes through or is stored in the database. The image goes from S3 only to the authorised viewer, by a link that expires.</li>
+<li><b>Realistic:</b> search on metadata, then open the image in a viewer. Hospitals already work this way.</li>
+</ul>
+<div class="note"><b>Alternative, not used here:</b> a Python UDF in Exasol could open each <code>.dcm</code> in S3 and read the header directly, so no separate index would be needed. It works, but it is slower and duplicates what the PACS already keeps.</div>
+<h3>The full path, as a sequence</h3>
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant B as Browser
+  participant C as Console (dash-server)
+  participant E as Exasol
+  participant S as Amazon S3
+  B->>C: click "What did her earlier scans show?"
+  C->>E: SELECT … FROM HOSP_CORE.IMAGING_STUDIES WHERE UNIFIED_ID = her
+  E->>S: signed GET index/dicom_index.csv (CONNECTION HOSP_S3)
+  S-->>E: 168 header rows
+  E->>E: join PatientID tags to the patient index
+  E-->>C: 3 rows: date, modality, S3_KEY, THUMB_KEY (no pixels)
+  C->>C: sign a GET URL per key (SigV4, ap-south-1, 15 min, hc-s3-reader)
+  C-->>B: page with img src = signed thumbnail URL
+  B->>S: GET thumbs/SOP.png (signed)
+  S-->>B: PNG preview
+  Note over B,S: "Render it from the DICOM file now" repeats the path for the original file
+  C->>S: GET pacs/…/SOP.dcm (signed)
+  S-->>C: DICOM bytes (about 1 MB)
+  C->>C: parse header, apply window, encode PNG
+  C-->>B: rendered image + header tags + time per step
+</pre>
+<h3>Step by step, with measured times (2019 chest X-ray)</h3>
+<div class="tbl"><table>
+<thead><tr><th>#</th><th>Step</th><th>Where</th><th class="num">Time</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Read the header index from S3 and match PatientID tags to her</td><td><span class="tag ex">Exasol</span> + <span class="tag s3">S3</span></td><td class="num">0.3 s</td></tr>
+<tr><td>2</td><td>Sign a GET for the one key (query-string SigV4; the key never leaves the console)</td><td>Console</td><td class="num">&lt; 0.01 s</td></tr>
+<tr><td>3</td><td>Download the DICOM file (1,018 KB, <code>application/dicom</code>)</td><td><span class="tag s3">S3</span></td><td class="num">0.3–0.4 s</td></tr>
+<tr><td>4</td><td>Parse the header with pydicom: DX, 676 &times; 768 px, 12 of 16 bits, MONOCHROME2, PatientID <code>BRA2014000731</code></td><td>Console</td><td class="num">&lt; 0.01 s</td></tr>
+<tr><td>5</td><td>Apply the window from the header (centre 2048, width 4096) to map 12-bit values to 8-bit grey; invert if MONOCHROME1</td><td>Console</td><td class="num">&lt; 0.01 s</td></tr>
+<tr><td>6</td><td>Encode PNG (178 KB) and send it to the browser</td><td>Console</td><td class="num">0.1 s</td></tr>
+</tbody></table></div>
+<h3>Why signed URLs</h3>
+<p>The bucket is private. A presigned URL is a normal HTTPS link with the signature in the query string (<code>X-Amz-Algorithm=AWS4-HMAC-SHA256</code>, <code>X-Amz-Credential</code>, <code>X-Amz-Expires=900</code>, <code>X-Amz-Signature</code>). It grants one GET of one object for 15 minutes. It must be signed for the regional endpoint (<code>s3.ap-south-1.amazonaws.com</code>) with SigV4; the global endpoint signs for us-east-1 and S3 answers <code>SignatureDoesNotMatch</code>.</p>
+<h3>How the previews were made</h3>
+<p>Offline, once, by <code>data/imaging.py</code>: download the TCIA series, take the middle frame of multi-frame studies, apply the VOI LUT, clip to the 0.5–99.5 percentile, relabel every identifying tag (PatientID, name, birth date, dates, institution, accession number, new UIDs, <code>PatientIdentityRemoved = YES</code>), write the 768 px DICOM and a 420 px PNG, upload both, and write the index row. The console links three ways to each file: the <code>s3://</code> URI, the AWS console page, and a signed download.</p>
+<div class="note"><b>In production</b> a hospital would put a DICOM viewer (OHIF or the PACS's own) behind the same signed-link pattern, or use DICOMweb (WADO-RS). Exasol's role is unchanged: find the right studies for the right person, under the caller's access rules.</div>
+</section>
+
+<!-- ======================================================= 13 -->
+<section id="gov">
+<h2><span class="n">13</span>Governance: who may see what</h2>
+<p>The governed layer: definitions live in the view, rows are filtered in the engine, and named users can read these views and nothing else.</p>
+<div class="tbl"><table>
+<thead><tr><th>Piece</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><code>HOSP_GOV.ACCESS_MAP</code></td><td><code>(USER_NAME, BRANCH, PHI_LEVEL)</code>: <code>HOSP_DR_BRB</code> &rarr; BRB, FULL; <code>HOSP_QUALITY_ANALYST</code> &rarr; *, MASKED; <code>SYS</code> &rarr; *, FULL</td></tr>
+<tr><td><code>HOSP_GOV.VISIBLE_PATIENTS</code></td><td>Patients with a record registered at one of the caller's branches, joined on <code>CURRENT_USER</code>. Not granted to anyone.</td></tr>
+<tr><td><code>PATIENTS</code></td><td>One row per person. MASKED callers get <code>'Patient ' || SUBSTR(HASH_SHA1(UNIFIED_ID), 1, 6)</code>, and NULL birth date and mobile.</td></tr>
+<tr><td><code>ENCOUNTERS</code>, <code>READMISSIONS_30D</code>, <code>ALLERGY_ALERTS</code>, <code>IMAGING_STUDIES</code></td><td>The <code>HOSP_CORE</code> views, joined to <code>VISIBLE_PATIENTS</code>. Each carries its definition and grain in <code>COMMENT IS</code>, which is what an AI client reads before writing SQL.</td></tr>
+<tr><td>Role <code>HOSP_AGENT_READER</code></td><td>SELECT on the five governed views, nothing else</td></tr>
+<tr><td>Users</td><td><code>HOSP_DR_BRB</code> (treating physician, Branch B) and <code>HOSP_QUALITY_ANALYST</code> (all branches), each with CREATE SESSION + the role</td></tr>
+</tbody></table></div>
+<p><b>Why this works without granting the sources.</b> In Exasol a view runs with its owner's privileges. The named users can select from <code>HOSP_GOV.ALLERGY_ALERTS</code>, and the view (owned by the administrator) reads the virtual schemas and the connections on their behalf. Asked directly for <code>HOSP_CORE.PATIENT_SUMMARY</code>, the same user gets <i>insufficient privileges</i>, and the refusal is in the audit log.</p>
+<p><b>Same question, two people</b> (tab 3): the doctor sees 2 conflicting orders with full names (patients registered in Branch B, with their history from every branch). The analyst sees 3, with pseudonyms. Same SQL, same view.</p>
+</section>
+
+<!-- ======================================================= 14 -->
+<section id="mcp">
+<h2><span class="n">14</span>AI agents through MCP</h2>
+<p>Tab 3 uses the real <code>exasol-mcp-server@2.2.0</code>, the same server Claude Desktop or any MCP client would use, started over stdio with <code>uvx</code>, logged in as one of the named users:</p>
+<pre><code>EXA_DSN=127.0.0.1/nocertcheck:8563   EXA_USER=HOSP_DR_BRB   EXA_PASSWORD=(from secrets/agent_users.env)
+EXA_MCP_SETTINGS={"schemas":{"like_pattern":"HOSP_GOV"}, "tables":{"enable":false}, "views":{"enable":true},
+                  "functions":{"enable":false}, "scripts":{"enable":false},
+                  "enable_read_query":true, "enable_write_query":false,
+                  "enable_read_bucketfs":false, "enable_write_bucketfs":false, "default_row_limit":50}</code></pre>
+<ol class="steps">
+<li><code>list_exasol_schemas</code>: which data may I see? &rarr; <code>HOSP_GOV</code> only.</li>
+<li><code>list_exasol_tables_and_views</code>: the five views and their comments (the certified definitions).</li>
+<li><code>execute_exasol_query</code>: the question against <code>HOSP_GOV.ALLERGY_ALERTS</code>, as this person.</li>
+</ol>
+<p><b>Protocol.</b> MCP over stdio is JSON-RPC 2.0, one message per line. The runner sends <code>initialize</code> (protocol version 2025-06-18, client name <code>hospital-chain-demo</code>), then <code>notifications/initialized</code>, then one <code>tools/call</code> per step. Each call waits at most 30 s. Results come back with <code>structuredContent</code> (columns and rows), which the page renders. A failed run is retried once; if it still fails, the last good run is shown, labelled.</p>
+<p>The database part takes about 1.5 s. Starting the MCP server with <code>uvx</code> takes 3–12 s on top, and the page reports the two separately.</p>
+<div class="note"><b>Where the MCP server is started.</b> dash-server refuses a hosted app that handles database credentials. So the console calls <code>agent/mcp_runner.py</code> (outside the app, in the project's Python environment), which reads the user's password, starts the MCP server, runs the three calls and prints JSON. The console holds no credentials, exactly like a hospital assistant that only talks to an MCP server.</div>
+</section>
+
+<!-- ======================================================= 15 -->
+<section id="accel">
+<h2><span class="n">15</span>Acceleration</h2>
+<p>Federation first, then copy only what people ask about every day. <code>HOSP_ACCEL.ENCOUNTERS</code> is built with one statement from the live views:</p>
+<pre><code>CREATE OR REPLACE TABLE HOSP_ACCEL.ENCOUNTERS AS
+SELECT UNIFIED_ID, ENCOUNTER_ID, RECORD_ID, SOURCE_SYSTEM, BRANCH, ENCOUNTER_CLASS, DEPARTMENT, ADMIT_DATE, DISCHARGE_DATE,
+       STATUS, DX_CODE, DIAGNOSIS, LENGTH_OF_STAY, CURRENT_TIMESTAMP AS COPIED_AT
+FROM HOSP_CORE.ENCOUNTERS;</code></pre>
+<p><code>HOSP_ACCEL.READMISSIONS_30D</code> is the same definition over the copy. Question 5 runs both: about 1.0 s live across Postgres and MongoDB, 0.01 s on the copy, identical numbers branch by branch. The console is read-only, so the copy is rebuilt at set-up (or by a scheduled job), not from the page.</p>
+</section>
+
+<!-- ======================================================= 16 -->
+<section id="console">
+<h2><span class="n">16</span>The console</h2>
+<p>A Dash app hosted on <b>dash-server</b>, Exasol's agent-operated dashboard server from the Starter Kit: <code>http://127.0.0.1:5100/apps/hospital-chain</code>. Four tabs: Overview, Live demo, Who is asking, How it works.</p>
+<div class="tbl"><table>
+<thead><tr><th>Aspect</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Database login</td><td>dash-server profile <code>starter-kit</code> &rarr; the kit's read-only user <code>MCP_READONLY</code>. The app never sees a password.</td></tr>
+<tr><td>Queries</td><td>One file per query in <code>queries/business/*.sql</code>, generated by <code>dash/deploy.py</code> from <code>console.QUERIES</code>. <code>EXPLAIN VIRTUAL</code> files sit in <code>explain/</code> so the deploy-time smoke test (which wraps every query in <code>SELECT * FROM (…) WHERE 1=0</code>) skips them.</td></tr>
+<tr><td>Audit log</td><td><code>MCP_READONLY</code> cannot read <code>EXA_DBA_AUDIT_*</code>, so it reads <code>HOSP_CONSOLE.AGENT_AUDIT</code>, an admin-owned view limited to the two demo users' SELECTs.</td></tr>
+<tr><td>S3 and DICOM</td><td>boto3 signs links with the read-only key; pydicom, numpy and Pillow render the live image. Installed into dash-server's environment from the app's <code>requirements.txt</code>.</td></tr>
+<tr><td>Fallback</td><td>Every successful result is cached in <code>dash/cache/</code>. If a source fails on stage, the page shows the last good result, labelled as cached.</td></tr>
+<tr><td>Deploy</td><td><code>.venv/bin/python dash/deploy.py</code>: writes the files, validates, deploys live with automatic rollback, runs the health probes.</td></tr>
+<tr><td>Verify</td><td><code>.venv/bin/python tools/shoot_dash.py &lt;dir&gt; over demo:who … agent flow</code> clicks every tab and question in headless Chrome and saves screenshots.</td></tr>
+<tr><td>Fallback console</td><td>The earlier Streamlit version, <code>app/run.sh</code> on <code>:8515</code>, with the same content (still shows city names).</td></tr>
+<tr><td>Branch names on screen</td><td>The chain is fictional: <b>Branch A</b> (legacy), <b>Branch B</b> (modern) and <b>Branch C</b> (migrating), codes <code>BRA</code>, <code>BRB</code>, <code>BRC</code> in record IDs and user names. <code>console.generic()</code> turns bare branch codes into these names in everything the page renders. The data, the SQL and the record IDs (<code>BRA/2014/000731</code>, <code>BRB-P-108842</code>) keep the codes. This document uses the real names, since it describes the data.</td></tr>
+<tr><td>Failed sources</td><td>The overview and flow numbers are cached for 10 minutes only when every source answered; a failure is retried on the next request.</td></tr>
+</tbody></table></div>
+<h3>dash-server internals that matter</h3>
+<ul>
+<li><b>Runtime:</b> dash-server 0.1.1, apps mounted in-process in one Flask server (Dash 4.4.1). <code>app.py</code> exposes <code>create_dash_app(server, url_base_pathname, metadata)</code>; dash-server loads it under a synthetic module name, so sibling modules must be imported at the top of a file (an import inside a callback fails).</li>
+<li><b>Queries:</b> each callback calls <code>load_rows(server, metadata, __file__, "queries/business/&lt;name&gt;.sql", params=…)</code>. dash-server opens one pyexasol session per worker thread per profile and reuses it; row limit 50,000; statement timeout 30 s. A failure returns <code>[{"_error": …}]</code> instead of raising.</li>
+<li><b>Parameters:</b> pyexasol placeholders. The only parameterised query is <code>similar_text.sql</code>, which takes <code>{vec!r}</code>: a <code>VALUES</code> list of 384 numbers computed by the console from the typed text, never the text itself.</li>
+<li><b>Deploy checks:</b> validate (manifest, dependencies, lint, syntax, imports, callbacks, credential safety), build, SQL smoke test, then health probes: publication, process alive, HTTP ready, Dash layout, Dash dependencies, static assets, data layer, SQL smoke. All pass. They do not prove that callbacks return data, which is why <code>shoot_dash.py</code> clicks everything.</li>
+<li><b>Rendering:</b> the HTML builders are shared with the Streamlit version and shown through <code>dcc.Markdown(dangerously_allow_html=True)</code>. That component renders a whole block as nothing, with no error, if it contains <code>&lt;br&gt;</code> without a slash or an unquoted attribute. The helper <code>H()</code> fixes void tags automatically.</li>
+</ul>
+<h3>Query files and where they appear</h3>
+<div class="tbl"><table>
+<thead><tr><th>File (queries/business/)</th><th>Shown in</th></tr></thead>
+<tbody>
+<tr><td><code>health_exa</code>, <code>health_pg</code>, <code>health_mongo</code>, <code>health_s3</code></td><td>The four status pills in the header (every 60 s)</td></tr>
+<tr><td><code>who</code>, <code>allergy</code>, <code>mpi_total</code>, <code>chain</code>, <code>readm_fast</code>, <code>inbed</code></td><td>Overview problem picture and numbers (cached 10 min)</td></tr>
+<tr><td><code>who</code></td><td>Question 1</td></tr>
+<tr><td><code>allergy</code>, <code>allergy_ehr</code>, <code>allergy_note</code></td><td>Question 2</td></tr>
+<tr><td><code>scans</code>, <code>scans_all</code></td><td>Question 3</td></tr>
+<tr><td><code>similar</code>, <code>similar_text</code></td><td>Question 4 (her note / typed text)</td></tr>
+<tr><td><code>readm_live</code>, <code>readm_fast</code></td><td>Question 5</td></tr>
+<tr><td><code>chain</code>, <code>inbed</code></td><td>Question 6</td></tr>
+<tr><td><code>agent_audit</code></td><td>Tab 3 audit log</td></tr>
+<tr><td><code>flow_counts</code>, <code>scans_all</code></td><td>Tab 4 numbers in the boxes</td></tr>
+<tr><td><code>flow_t_mpi</code>, <code>flow_t_orders</code>, <code>flow_t_allergy</code>, <code>flow_t_class</code>, <code>flow_t_all</code></td><td>Tab 4 trace, steps 1–5</td></tr>
+<tr><td><code>explain/who|allergy|chain|readmit.sql</code></td><td>"Show what Postgres received" buttons</td></tr>
+</tbody></table></div>
+<p>The full text of every query is in appendix B.</p>
+</section>
+
+<!-- ======================================================= 17 -->
+<section id="questions">
+<h2><span class="n">17</span>Six questions, end to end</h2>
+<div class="tbl"><table>
+<thead><tr><th>#</th><th>Question</th><th>Systems touched</th><th>Key objects</th><th class="num">Live time</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Who is Meenakshi Sundaram, across every branch?</td><td><span class="tag pg">PG</span> <span class="tag mg">Mongo</span> <span class="tag s3">S3</span></td><td><code>LEGACY_PATIENTS</code>, <code>MODERN_PATIENTS</code>, <code>IMAGING_INDEX</code>, <code>MPI</code></td><td class="num">1.3 s</td></tr>
+<tr><td>2</td><td>Is the prescription Branch B just drafted safe for her?</td><td><span class="tag pg">PG</span> <span class="tag mg">Mongo</span></td><td><code>ALLERGY_CONFLICTS</code>, <code>DIS_SUMM</code></td><td class="num">1.3 s</td></tr>
+<tr><td>3</td><td>What did her earlier scans show?</td><td><span class="tag s3">S3</span></td><td><code>IMAGING_STUDIES</code></td><td class="num">0.3 s</td></tr>
+<tr><td>4</td><td>Patients like her who were also penicillin-allergic: what worked?</td><td><span class="tag ex">Exasol</span> <span class="tag pg">PG</span> <span class="tag mg">Mongo</span></td><td><code>NOTE_VECTORS</code>, <code>DIABETIC_PATIENTS</code>, <code>ALLERGIES</code>, <code>MEDICATIONS</code>, <code>READMISSIONS_30D</code></td><td class="num">4.0 s</td></tr>
+<tr><td>5</td><td>How many readmissions can no single branch see?</td><td><span class="tag pg">PG</span> <span class="tag mg">Mongo</span>, then <span class="tag ex">copy</span></td><td><code>READMISSIONS_30D</code>, <code>HOSP_ACCEL</code></td><td class="num">1.0 s &rarr; 0.01 s</td></tr>
+<tr><td>6</td><td>Who else is in a bed right now with an order like hers?</td><td><span class="tag pg">PG</span> <span class="tag mg">Mongo</span></td><td><code>ALLERGY_CONFLICTS</code>, <code>ENCOUNTERS</code>, <code>PATIENT_SUMMARY</code></td><td class="num">1.6 s</td></tr>
+</tbody></table></div>
+<h3>Question 2 taken apart (tab 4 trace)</h3>
+<div class="tbl"><table>
+<thead><tr><th>#</th><th>Step</th><th>Runs on</th><th>Result</th><th class="num">Time</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Find every record of her</td><td><span class="tag ex">Exasol</span></td><td><code>BRB-P-108842</code>, <code>BRA/2014/000731</code></td><td class="num">0.04 s</td></tr>
+<tr><td>2</td><td>Read today's orders in Branch B</td><td><span class="tag mg">MongoDB</span></td><td>Amoxicillin-clavulanate (draft), Paracetamol, Metformin</td><td class="num">0.12 s</td></tr>
+<tr><td>3</td><td>Read her allergy notes in Branch A</td><td><span class="tag pg">Postgres</span></td><td>"PENICILLIN - ANAPHYLAXIS (2019) - AMOXY-CLAV IV" &rarr; PENICILLIN, severe</td><td class="num">0.87 s</td></tr>
+<tr><td>4</td><td>Look up the drug class</td><td><span class="tag ex">Exasol</span></td><td>Amoxicillin-clavulanate is a penicillin</td><td class="num">0.00 s</td></tr>
+<tr><td>5</td><td>All of it as the one certified view</td><td><span class="tag ex">Exasol + both</span></td><td>Conflict</td><td class="num">1.51 s</td></tr>
+</tbody></table></div>
+<p>Step 5 is slower than steps 1–4 combined because the view checks every current order in the chain and then keeps her row; that same view answers question 6.</p>
+</section>
+
+<!-- ======================================================= 18 -->
+<section id="security">
+<h2><span class="n">18</span>Credentials and security</h2>
+<div class="tbl"><table>
+<thead><tr><th>Secret</th><th>Kept in</th><th>Seen by</th></tr></thead>
+<tbody>
+<tr><td>Postgres <code>his_reader</code>, MongoDB <code>ehr_reader</code></td><td>Exasol CONNECTION objects</td><td>Exasol only. Users of the views never see them.</td></tr>
+<tr><td>S3 read-only key</td><td><code>secrets/s3_reader_key.json</code> (mode 600) and CONNECTION <code>HOSP_S3</code> (written via stdin, never on a command line)</td><td>Exasol, and the console for signing</td></tr>
+<tr><td>Named users' passwords</td><td><code>secrets/agent_users.env</code> (mode 600), generated by <code>setup/05_governance.py</code></td><td><code>agent/mcp_runner.py</code> only</td></tr>
+<tr><td>Console database login</td><td>dash-server's own secret store (profile <code>starter-kit</code>)</td><td>dash-server</td></tr>
+<tr><td>Admin login for set-up</td><td><code>~/.exapump/config.toml</code> profile <code>starter-kit</code></td><td>Set-up scripts</td></tr>
+</tbody></table></div>
+<ul>
+<li>Every path into a source is read-only at the source, not just by convention in Exasol.</li>
+<li>The truth file is never loaded, so the index cannot cheat.</li>
+<li>No patient data is real. The images are public, de-identified research data.</li>
+</ul>
+</section>
+
+<!-- ======================================================= 19 -->
+<section id="ops">
+<h2><span class="n">19</span>Build and operate</h2>
+<h3>Build order (all scripts re-runnable)</h3>
+<div class="note"><b>From a fresh clone</b>, <code>setup/build_all.sh</code> runs all of this in order (see the README): set <code>HC_S3_BUCKET</code> in <code>config.local.env</code> first. The images, the note vectors and the source tables ship in <code>data/out</code>, so step 6 is <code>data/imaging.py upload</code> and step 7 loads the shipped vectors. The table below is the original build order.</div>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>Command</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>setup/00_sources_vm.sh</code></td><td>Loads the Postgres and MongoDB images into the VM and starts both containers</td></tr>
+<tr><td>2</td><td><code>.venv/bin/python data/generate.py</code></td><td>Writes the 1,200 people into both systems; creates the read-only logins; writes the truth files</td></tr>
+<tr><td>3</td><td><code>setup/01_mongo_vs.sh</code></td><td>Rust SLC + MongoDB adapter into BucketFS; registers RUST; creates the adapter scripts</td></tr>
+<tr><td>4</td><td><code>setup/02_sources.sh</code></td><td>Postgres adapter + driver; the two connections; the three virtual schemas; the loader driver</td></tr>
+<tr><td>5</td><td><code>sql/10_typed_sources.sql</code>, <code>20_mpi.sql</code></td><td>Typed views; the patient index</td></tr>
+<tr><td>6</td><td><code>data/imaging.py</code>, <code>setup/s3_reader.sh</code> (run by the build), <code>setup/04_imaging.sh</code></td><td>Images to S3; the read-only IAM user; <code>HOSP_S3</code> and the imaging views</td></tr>
+<tr><td>7</td><td><code>data/embed.py</code></td><td>Embeds the notes and loads <code>NOTE_INDEX</code> / <code>NOTE_VECTORS</code></td></tr>
+<tr><td>8</td><td><code>sql/30_fused.sql</code>, <code>setup/05_governance.py</code>, <code>sql/50_accelerate.sql</code>, <code>sql/60_console.sql</code></td><td>Clinical views; governed views, role and users; the copy; the console's audit view</td></tr>
+<tr><td>9</td><td><code>data/check_mpi.py</code></td><td>Measures the index against the truth file</td></tr>
+<tr><td>10</td><td><code>dash/deploy.py</code></td><td>Deploys the console</td></tr>
+</tbody></table></div>
+<h3>Demo morning</h3>
+<p><code>setup/preflight.sh</code> gives GO / NO-GO and fixes what it safely can:</p>
+<ol class="steps">
+<li><b>Exasol:</b> starts it if needed; <code>SELECT 1</code> must answer.</li>
+<li><b>Branch systems:</b> <code>podman start hc-legacy-pg hc-modern-mongo</code> inside the VM.</li>
+<li><b>VM clock:</b> compares it with the Mac; if more than 60 s off, runs <code>hwclock -s</code> in the VM. S3 refuses requests signed with a wrong clock.</li>
+<li><b>Each source through Exasol:</b> legacy patients &gt; 0, the hero's EHR record, the S3 index, the hero's allergy conflict, and free sessions under the 20-session cap.</li>
+<li><b>Consoles:</b> the dash-server console answers HTTP 200; the Streamlit fallback is started if it is not running.</li>
+</ol>
+<p>Also useful: <code>.venv/bin/python tools/shoot_dash.py &lt;dir&gt; over demo:who demo:allergy demo:scans render demo:similar simtext demo:readmit demo:chain agent flow</code> runs the whole demo in headless Chrome (about 2 minutes) and saves a screenshot per step.</p>
+</section>
+
+<!-- ======================================================= 20 -->
+<section id="limits">
+<h2><span class="n">20</span>Known limits on this build</h2>
+<div class="tbl"><table>
+<thead><tr><th>Issue</th><th>Effect</th><th>How the demo avoids it</th></tr></thead>
+<tbody>
+<tr><td>An aggregate with no group key, or <code>GROUP BY</code> on an expression, over a <code>UNION ALL</code> of virtual-schema views</td><td>Engine assert (<code>querycreationvisitor.cpp:5934</code>); the session aborts</td><td>Always group by a column. Report to Exasol.</td></tr>
+<tr><td>Parquet reader on <code>amazonaws.com</code></td><td>+12 s per request</td><td>Read the CSV index. Report to Exasol.</td></tr>
+<tr><td><code>REGEXP_LIKE</code> pushed to Postgres</td><td>Fails at the source</td><td><code>LIKE</code> in legacy views</td></tr>
+<tr><td>JDBC driver location for the loader</td><td>Metadata works, queries fail</td><td>Driver also in <code>vm-shared/exa/jdbc</code></td></tr>
+<tr><td>Rust SLC not in the catalog</td><td>No one-command install</td><td>Copied into BucketFS by hand</td></tr>
+<tr><td>Reserved words <code>SOURCE</code>, <code>SYSTEM</code></td><td>Syntax errors as column names</td><td><code>SOURCE_SYSTEM</code>, <code>SOURCE_LABEL</code></td></tr>
+<tr><td>Containers and clock after a VM restart</td><td>Sources down; S3 403</td><td><code>setup/preflight.sh</code></td></tr>
+<tr><td>Exasol Personal licence</td><td>20 parallel connections</td><td>One connection per worker; nothing else heavy running</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ======================================================= 21 -->
+<section id="faq">
+<h2><span class="n">21</span>Questions to expect</h2>
+<dl class="qa">
+<dt>Is any patient data copied into Exasol?</dt>
+<dd>Only what earns it: the patient index (record IDs, names and birth dates needed for matching), the note vectors (numbers, not text), and the optional copy of encounters for the readmission question. Every other answer reads the sources live.</dd>
+<dt>How fresh is the data?</dt>
+<dd>Live for orders, allergies, encounters and images: a draft order written in MongoDB a second ago is in the next answer. The patient index and the note vectors are as fresh as their last rebuild (nightly or on each registration in production).</dd>
+<dt>What does the source system actually receive?</dt>
+<dd>Postgres receives ordinary SELECTs with only the needed columns and the filters (section 05, visible with EXPLAIN VIRTUAL). MongoDB receives a find with a projection and a filter (section 06). S3 receives one GET for the index.</dd>
+<dt>What if a source is down?</dt>
+<dd>Questions that need it fail with a clear error; others keep working. The console shows the last good result, labelled as cached. In production, the questions that must survive an outage are the ones to copy into HOSP_ACCEL.</dd>
+<dt>Can it write back to the HIS or EHR?</dt>
+<dd>No, by design. Every connection uses a read-only login at the source.</dd>
+<dt>How do you stop a wrong merge of two patients?</dt>
+<dd>The threshold favours precision (100% here), every link carries its reason, and borderline pairs go to a review queue instead of being merged. Rules are SQL, so a clinician-approved change is a reviewed diff.</dd>
+<dt>Why not migrate everything first?</dt>
+<dd>Because answers are needed now and migrations take years. Federation gives the answer on day one; the copy is added for the paths that prove worth it; migration can happen later, branch by branch, without changing the views people use.</dd>
+<dt>Does the AI see raw patient data?</dt>
+<dd>It sees exactly what the person it acts for may see: the same governed views, the same row filter, the same masking, the same audit log. Asking for the raw table is refused by the database, not by the prompt.</dd>
+<dt>How would this scale to a real chain?</dt>
+<dd>Exasol runs as a cluster; the virtual schemas push work to the sources; the patient index and vectors are ordinary tables. The demo's laptop limits (one VM, 20 connections) are not product limits.</dd>
+<dt>Where would the images be viewed in production?</dt>
+<dd>In the hospital's DICOM viewer, opened with the same signed-link or DICOMweb pattern. Exasol's part is finding the right studies for the right person under the caller's rules.</dd>
+</dl>
+</section>
+
+<!-- ======================================================= 22 -->
+<section id="gloss">
+<h2><span class="n">22</span>Glossary</h2>
+<div class="tbl"><table>
+<tbody>
+<tr><td><b>HIS</b></td><td>Hospital information system: registration, admissions, billing, pharmacy, labs. Here the legacy Postgres system.</td></tr>
+<tr><td><b>EHR</b></td><td>Electronic health record: the clinical record. Here the modern MongoDB platform.</td></tr>
+<tr><td><b>PACS</b></td><td>Picture archiving and communication system: where scanners store images. Here S3.</td></tr>
+<tr><td><b>DICOM</b></td><td>The file format and protocol for medical images; each file has a header of tags (PatientID, StudyDate, Modality…) and pixel data.</td></tr>
+<tr><td><b>Modality</b></td><td>DX / CR = X-ray, CT = computed tomography, MR = MRI.</td></tr>
+<tr><td><b>MPI</b></td><td>Master patient index: which records are the same person.</td></tr>
+<tr><td><b>FHIR</b></td><td>The HL7 standard for health data as resources (Patient, Encounter…); the EHR documents follow its shape.</td></tr>
+<tr><td><b>Virtual schema</b></td><td>An Exasol schema whose tables live in another system; queries are pushed to that system by an adapter.</td></tr>
+<tr><td><b>Pushdown</b></td><td>Running part of a query (columns, filters) at the source so less data travels.</td></tr>
+<tr><td><b>SLC / BucketFS</b></td><td>Script-language container (the runtime for Java, Rust or Python code in Exasol) / Exasol's replicated file system that holds it.</td></tr>
+<tr><td><b>UDF</b></td><td>User-defined function; the MongoDB scan runs as one.</td></tr>
+<tr><td><b>MCP</b></td><td>Model Context Protocol: how AI clients call tools such as the Exasol MCP server.</td></tr>
+<tr><td><b>SigV4 / presigned URL</b></td><td>AWS request signing; a link that carries its own time-limited signature.</td></tr>
+<tr><td><b>Readmission (30-day)</b></td><td>An inpatient admission within 30 days of the same person's previous inpatient discharge.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ======================================================= 23 -->
+<section id="versions">
+<h2><span class="n">23</span>Component versions</h2>
+<div class="tbl"><table>
+<thead><tr><th>Component</th><th>Version</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>Exasol Personal</td><td>2026.2.0-nano.3</td><td>The database, in a VM on the Mac (Starter Kit, level 1)</td></tr>
+<tr><td>PostgreSQL</td><td>16 (image <code>postgres:16</code>)</td><td>Legacy HIS</td></tr>
+<tr><td>MongoDB</td><td>8.2 (image <code>mongo:8.2</code>; 8.0 does not boot on kernel 6.19+)</td><td>Modern EHR</td></tr>
+<tr><td>Exasol virtual-schema framework / PostgreSQL dialect</td><td>14.0.4 / 4.0.1</td><td>Postgres virtual schema</td></tr>
+<tr><td>PostgreSQL JDBC driver</td><td>42.7.4</td><td>Adapter and loader</td></tr>
+<tr><td>Exasol Labs MongoDB virtual schema</td><td>built from <code>exasol-labs/exasol-mongodb-vs</code></td><td>MongoDB virtual schema (Rust)</td></tr>
+<tr><td>Rust script-language container</td><td>0.23.0, aarch64</td><td>Runs the MongoDB adapter and scan UDF</td></tr>
+<tr><td>Java script-language container</td><td>from <code>exasol slc install JAVA</code></td><td>Runs the Postgres adapter</td></tr>
+<tr><td>exasol-mcp-server</td><td>2.2.0 (via <code>uvx</code> 0.12.1)</td><td>AI agent access, tab 3</td></tr>
+<tr><td>dash-server</td><td>0.1.1 (Dash 4.4.1, Flask 3.1.3, pyexasol 2.4.1)</td><td>Hosts the console</td></tr>
+<tr><td>Console extras in dash-server's environment</td><td>boto3 1.43.119, pydicom 3.0.2, numpy 2.5.4, Pillow 13.0.0</td><td>S3 signing, live DICOM render</td></tr>
+<tr><td>Project Python environment</td><td>Python 3.12.13; pyexasol 3.0.1, psycopg 3.3.6, pymongo 4.19.0, pydicom 3.0.2, fastembed 0.9.1 (onnxruntime 1.31.0), boto3 1.43.118, pyarrow 26.0.0, Streamlit 1.66.1, Playwright 1.64.1</td><td>Generator, loaders, MCP runner, embedding, Streamlit fallback, tests</td></tr>
+<tr><td>Embedding model</td><td>BAAI/bge-small-en-v1.5, 384 dimensions</td><td>Note vectors</td></tr>
+<tr><td>Images</td><td>TCIA COVID-19-AR, UPENN-GBM (CC BY 4.0)</td><td>Real de-identified DICOM</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ======================================================= 24 -->
+<section id="files">
+<h2><span class="n">24</span>Where everything is</h2>
+<pre><code>hospital_chain/
+├── setup/                 <span class="c">set-up and operations (bash, all re-runnable)</span>
+│   ├── common.sh          <span class="c">shared settings: paths, SRC_HOST=10.88.0.1, bucket, xsql/xfile helpers</span>
+│   ├── vm.sh              <span class="c">run a command in the Exasol VM as root over SSH (key + IP from vm-runtime.json)</span>
+│   ├── 00_sources_vm.sh   <span class="c">Postgres + MongoDB containers inside the VM</span>
+│   ├── 01_mongo_vs.sh     <span class="c">Rust SLC + MongoDB adapter</span>
+│   ├── 02_sources.sh      <span class="c">Postgres adapter, connections, 3 virtual schemas, loader driver</span>
+│   ├── s3_reader.sh       <span class="c">read-only IAM user (you run it)</span>
+│   ├── 04_imaging.sh      <span class="c">HOSP_S3 connection + imaging views</span>
+│   ├── 05_governance.py   <span class="c">governed views, role, named users, passwords</span>
+│   └── preflight.sh       <span class="c">demo-morning GO / NO-GO</span>
+├── sql/                   <span class="c">10 typed sources · 20 MPI · 25 imaging · 30 fused · 40 governed · 50 accelerate · 60 console</span>
+├── data/
+│   ├── generate.py        <span class="c">synthetic chain → Postgres + MongoDB, truth files, imaging plan, notes</span>
+│   ├── imaging.py         <span class="c">TCIA → relabelled DICOM + PNG + index → S3</span>
+│   ├── embed.py           <span class="c">notes → vectors → Exasol</span>
+│   ├── check_mpi.py       <span class="c">precision / recall of the MPI against the truth</span>
+│   └── out/               <span class="c">generated files (truth_*.csv never loaded), about 150 MB</span>
+├── dash/                  <span class="c">the console on dash-server (primary)</span>
+│   ├── app.py · console.py · story.py · scans.py · embed.py · agent_tab.py · flow.py · theme.py · page_css.py
+│   ├── deploy.py          <span class="c">writes queries/ and explain/, deploys, runs probes</span>
+│   └── cache/             <span class="c">last good result per query (outside the deployed artifact)</span>
+├── agent/mcp_runner.py    <span class="c">starts exasol-mcp-server as a named user (outside dash-server)</span>
+├── app/                   <span class="c">Streamlit fallback console (:8515)</span>
+├── secrets/               <span class="c">s3_reader_key.json, agent_users.env (mode 600)</span>
+├── docs/tech-spec.html    <span class="c">this document</span>
+├── .work/                 <span class="c">jars, TCIA cache, screenshot scripts (shoot_dash.py)</span>
+└── README.md
+
+~/.exasol/personal/deployments/default/local/runtime/
+├── vm-runtime.json        <span class="c">VM IP (192.168.64.129)</span>
+├── vm-ssh-key
+└── vm-shared/exa/
+    ├── bucketfs/bfsdefault/   <span class="c">BucketFS as a directory: hospital/jars, slc/rustslc, rust/libmongodb_vs.so</span>
+    └── jdbc/postgresql/       <span class="c">the loader's JDBC driver + settings.cfg</span>
+
+dash-server: http://127.0.0.1:5100/apps/hospital-chain   (app "hospital-chain", profile "starter-kit")</code></pre>
+</section>
+
+<!-- ======================================================= 25 -->
+<section id="trouble">
+<h2><span class="n">25</span>Troubleshooting</h2>
+<div class="tbl"><table>
+<thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Imaging queries fail: <code>403 … RequestTimeTooSkewed</code>; the PACS pill is red</td><td>The VM clock runs slow and the VM has no internet for NTP. On 28 Oct it was 19 hours behind after a sleep, and again 50 minutes behind only 30 minutes after a resync. S3 rejects requests signed more than 15 minutes off.</td><td><code>setup/vm_clock.sh</code> resyncs from the hypervisor clock and starts a loop in the VM that repeats it every 30 s (process <code>hc-clock-sync</code>). The loop is gone after a VM restart; <code>setup/preflight.sh</code> starts it again and checks it.</td></tr>
+<tr><td>Legacy or EHR questions fail; header pills red</td><td>The VM restarted and the containers did not come back</td><td><code>setup/preflight.sh</code> (starts them)</td></tr>
+<tr><td><code>license limit of 20 parallel connections</code></td><td>Too many open sessions (dash-server workers, other demos)</td><td>Restart dash-server only: <code>exakit stop dash-server &amp;&amp; exakit start dash-server</code></td></tr>
+<tr><td>A virtual-schema query aborts the session</td><td>Aggregate with no group key, or GROUP BY an expression, over a UNION ALL of virtual-schema views</td><td>Group by a column (section 20)</td></tr>
+<tr><td>Legacy query fails at Postgres with a function error</td><td>An expression Postgres does not have was pushed down (REGEXP_LIKE)</td><td>Use LIKE</td></tr>
+<tr><td>Legacy dates one day off</td><td>JVM timezone in the adapter</td><td><code>%jvmoption -Duser.timezone=UTC</code> (already set)</td></tr>
+<tr><td>Legacy metadata works, every SELECT fails</td><td>Loader cannot find the JDBC driver</td><td>Driver + <code>settings.cfg</code> in <code>vm-shared/exa/jdbc/postgresql</code></td></tr>
+<tr><td>EHR schema missing a field</td><td>The field was not in the sampled documents</td><td>Raise <code>INFERENCE_SAMPLE_SIZE</code> and recreate, or read <code>__mongodb_source_json</code></td></tr>
+<tr><td>Signed image links give <code>SignatureDoesNotMatch</code></td><td>Signed for the global endpoint</td><td>Regional endpoint + SigV4 (already in <code>scans.py</code>)</td></tr>
+<tr><td>A console block is blank, no error anywhere</td><td><code>&lt;br&gt;</code> or an unquoted attribute in an HTML fragment</td><td><code>H()</code> handles void tags; quote all attributes</td></tr>
+<tr><td>Callback fails with <code>ModuleNotFoundError</code></td><td>A sibling module imported inside a function</td><td>Import at the top of the file</td></tr>
+<tr><td>Deploy refused: credential safety</td><td>A hosted file sets <code>EXA_*</code> credential variables</td><td>Keep credential handling outside the app (as <code>agent/mcp_runner.py</code> does)</td></tr>
+<tr><td>Tab 3 slow (10 s+)</td><td><code>uvx</code> starting the MCP server</td><td>Expected; the page shows database time separately (about 1.5 s)</td></tr>
+<tr><td>Page shows "showing the last good run"</td><td>A live source failed for that query</td><td>The message names the error; fix the source and click again</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ======================================================= A -->
+<section id="appx-sql">
+<h2><span class="n">A</span>Appendix: every SQL file</h2>
+<p>The complete set-up SQL, exactly as on disk (<code>hospital_chain/sql</code>). Connection statements with credentials are created by the set-up scripts and are not shown.</p>
+<!--APPX-SQL-START-->
+<h3><code>sql/10_typed_sources.sql</code></h3>
+<pre><code>-- LIKE, not REGEXP_LIKE: the Postgres dialect pushes these expressions down and Postgres has no REGEXP_LIKE.
+-- HOSP_SRC: the sources, read live, translated into one vocabulary. Views only: nothing is stored.
+-- Every view reads a virtual schema (Postgres legacy HIS, MongoDB modern EHR) on each query.
+CREATE SCHEMA IF NOT EXISTS HOSP_SRC;
+
+-- ---------------------------------------------------------------- legacy HIS (Postgres): text dates, initials, free text
+CREATE OR REPLACE VIEW HOSP_SRC.LEGACY_PATIENTS AS
+WITH raw AS (
+  SELECT p.PAT_NO, p.BRANCH_CD, p.PAT_NM, p.SEX, p.DOB_TXT, p.AGE_YRS, p.PH_NO, p.CITY,
+         REGEXP_SUBSTR(p.PAT_NM, &#x27;[^ ]+&#x27;, 1, 1) AS T1, REGEXP_SUBSTR(p.PAT_NM, &#x27;[^ ]+&#x27;, 1, 2) AS T2
+  FROM HOSP_LEGACY.PAT_MSTR p)
+SELECT PAT_NO AS RECORD_ID, &#x27;LEGACY_HIS&#x27; AS SOURCE_SYSTEM, BRANCH_CD AS BRANCH, PAT_NM AS NAME_AS_RECORDED,
+       CASE WHEN LENGTH(REPLACE(T1, &#x27;.&#x27;, &#x27;&#x27;)) &lt;= 1 THEN T2 ELSE T1 END AS GIVEN_NAME,
+       CASE WHEN LENGTH(REPLACE(T1, &#x27;.&#x27;, &#x27;&#x27;)) &lt;= 1 THEN REPLACE(T1, &#x27;.&#x27;, &#x27;&#x27;) ELSE T2 END AS FAMILY_NAME,   -- often only an initial
+       SEX,
+       CASE WHEN DOB_TXT LIKE &#x27;__/__/____&#x27; THEN TO_DATE(DOB_TXT, &#x27;DD/MM/YYYY&#x27;)
+            WHEN DOB_TXT LIKE &#x27;__-__-__&#x27; THEN TO_DATE(SUBSTR(DOB_TXT, 1, 6)
+                 || CASE WHEN CAST(SUBSTR(DOB_TXT, 7, 2) AS DECIMAL(2,0)) &gt;= 27 THEN &#x27;19&#x27; ELSE &#x27;20&#x27; END || SUBSTR(DOB_TXT, 7, 2), &#x27;DD-MM-YYYY&#x27;)
+       END AS BIRTH_DATE,
+       -- the same text read the other way round: front desks swap day and month when both are &lt;= 12
+       CASE WHEN DOB_TXT LIKE &#x27;__/__/____&#x27; AND CAST(SUBSTR(DOB_TXT, 1, 2) AS DECIMAL(2,0)) &lt;= 12
+             AND CAST(SUBSTR(DOB_TXT, 4, 2) AS DECIMAL(2,0)) &lt;&gt; CAST(SUBSTR(DOB_TXT, 1, 2) AS DECIMAL(2,0))
+            THEN TO_DATE(DOB_TXT, &#x27;MM/DD/YYYY&#x27;) END AS BIRTH_DATE_SWAPPED,
+       DOB_TXT AS BIRTH_DATE_AS_RECORDED, AGE_YRS AS AGE_ONLY,
+       -- a 10-digit Indian mobile starts with 6-9; 0000xxxxxx is this demo&#x27;s synthetic, undiallable range
+       CASE WHEN LENGTH(PH_NO) = 10 AND (SUBSTR(PH_NO, 1, 1) IN (&#x27;6&#x27;, &#x27;7&#x27;, &#x27;8&#x27;, &#x27;9&#x27;) OR PH_NO LIKE &#x27;0000%&#x27;) THEN PH_NO END AS MOBILE,
+       INITCAP(CITY) AS CITY
+FROM raw;
+
+CREATE OR REPLACE VIEW HOSP_SRC.LEGACY_ENCOUNTERS AS
+SELECT v.VISIT_NO AS ENCOUNTER_ID, v.PAT_NO AS RECORD_ID, &#x27;LEGACY_HIS&#x27; AS SOURCE_SYSTEM, v.BRANCH_CD AS BRANCH,
+       CASE v.VISIT_TYP WHEN &#x27;IP&#x27; THEN &#x27;inpatient&#x27; WHEN &#x27;ER&#x27; THEN &#x27;emergency&#x27; ELSE &#x27;outpatient&#x27; END AS ENCOUNTER_CLASS,
+       CASE v.DEPT_CD WHEN &#x27;PULM&#x27; THEN &#x27;Pulmonology&#x27; WHEN &#x27;CARD&#x27; THEN &#x27;Cardiology&#x27; WHEN &#x27;NEURO&#x27; THEN &#x27;Neurology&#x27;
+            WHEN &#x27;MED&#x27; THEN &#x27;General Medicine&#x27; WHEN &#x27;ENDO&#x27; THEN &#x27;Endocrinology&#x27; WHEN &#x27;ONCO&#x27; THEN &#x27;Oncology&#x27;
+            WHEN &#x27;ORTHO&#x27; THEN &#x27;Orthopaedics&#x27; ELSE &#x27;Emergency&#x27; END AS DEPARTMENT,
+       TO_DATE(v.ADM_DT, &#x27;DD/MM/YYYY&#x27;) AS ADMIT_DATE, TO_DATE(v.DIS_DT, &#x27;DD/MM/YYYY&#x27;) AS DISCHARGE_DATE,
+       &#x27;finished&#x27; AS STATUS, v.DX_CD AS DX_CODE, INITCAP(v.DX_DESC) AS DIAGNOSIS
+FROM HOSP_LEGACY.VISIT_HDR v;
+
+CREATE OR REPLACE VIEW HOSP_SRC.LEGACY_ALLERGIES AS
+SELECT a.PAT_NO AS RECORD_ID, &#x27;LEGACY_HIS&#x27; AS SOURCE_SYSTEM, a.ALRGY_NOTE AS ALLERGY_AS_RECORDED,
+       CASE WHEN (UPPER(a.ALRGY_NOTE) LIKE &#x27;%PENICILLIN%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%AMOXY%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%AMPICILLIN%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%PEN ALLERGY%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%BETA-LACTAM%&#x27;) THEN &#x27;PENICILLIN&#x27;
+            WHEN (UPPER(a.ALRGY_NOTE) LIKE &#x27;%SULPHA%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%SULFA%&#x27;) THEN &#x27;SULFONAMIDE&#x27;
+            WHEN (UPPER(a.ALRGY_NOTE) LIKE &#x27;%NSAID%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%IBUPROFEN%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%DICLOFENAC%&#x27;) THEN &#x27;NSAID&#x27;
+            WHEN (UPPER(a.ALRGY_NOTE) LIKE &#x27;%CEFTRIAXONE%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%CEPHALO%&#x27;) THEN &#x27;CEPHALOSPORIN&#x27; END AS DRUG_CLASS,
+       CASE WHEN (UPPER(a.ALRGY_NOTE) LIKE &#x27;%ANAPHYLAXIS%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%STEVENS%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%ANGIOEDEMA%&#x27; OR UPPER(a.ALRGY_NOTE) LIKE &#x27;%BRONCHOSPASM%&#x27;) THEN &#x27;severe&#x27; ELSE &#x27;moderate&#x27; END AS SEVERITY
+FROM HOSP_LEGACY.ALRGY_TXT a
+WHERE UPPER(a.ALRGY_NOTE) NOT IN (&#x27;NKDA&#x27;, &#x27;NO KNOWN ALLERGY&#x27;, &#x27;NIL&#x27;);
+
+CREATE OR REPLACE VIEW HOSP_SRC.LEGACY_MEDICATIONS AS
+SELECT r.VISIT_NO AS ENCOUNTER_ID, v.PAT_NO AS RECORD_ID, &#x27;LEGACY_HIS&#x27; AS SOURCE_SYSTEM, INITCAP(r.DRUG_NM) AS DRUG,
+       r.DOSE_TXT AS DOSE, &#x27;completed&#x27; AS ORDER_STATUS
+FROM HOSP_LEGACY.RX_LINE r JOIN HOSP_LEGACY.VISIT_HDR v ON v.VISIT_NO = r.VISIT_NO;
+
+-- ---------------------------------------------------------------- modern EHR (MongoDB): nested documents become child tables
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_PATIENTS AS
+SELECT p.&quot;mongo_id&quot; AS RECORD_ID, &#x27;MODERN_EHR&#x27; AS SOURCE_SYSTEM, p.&quot;homeBranch&quot; AS BRANCH, n.&quot;text&quot; AS NAME_AS_RECORDED,
+       UPPER(n.&quot;given&quot;) AS GIVEN_NAME, UPPER(n.&quot;family&quot;) AS FAMILY_NAME,
+       CASE p.&quot;gender&quot; WHEN &#x27;female&#x27; THEN &#x27;F&#x27; WHEN &#x27;male&#x27; THEN &#x27;M&#x27; END AS SEX,
+       TO_DATE(p.&quot;birthDate&quot;, &#x27;YYYY-MM-DD&#x27;) AS BIRTH_DATE, p.&quot;birthDate&quot; AS BIRTH_DATE_AS_RECORDED,
+       RIGHT(t.&quot;mobile&quot;, 10) AS MOBILE, a.&quot;city&quot; AS CITY, p.&quot;allergies|array&quot; AS ALLERGIES_RECORDED
+FROM HOSP_EHR_PATIENTS.PATIENTS p
+LEFT JOIN HOSP_EHR_PATIENTS.&quot;PATIENTS_name&quot; n ON n.&quot;_id&quot; = p.&quot;name|object&quot;
+LEFT JOIN HOSP_EHR_PATIENTS.&quot;PATIENTS_telecom&quot; t ON t.&quot;_id&quot; = p.&quot;telecom|object&quot;
+LEFT JOIN HOSP_EHR_PATIENTS.&quot;PATIENTS_address&quot; a ON a.&quot;_id&quot; = p.&quot;address|object&quot;;
+
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_CONDITIONS AS
+SELECT p.&quot;mongo_id&quot; AS RECORD_ID, c.&quot;code&quot; AS CONDITION_CODE, c.&quot;display&quot; AS CONDITION_NAME
+FROM HOSP_EHR_PATIENTS.&quot;PATIENTS_conditions_arr&quot; c JOIN HOSP_EHR_PATIENTS.PATIENTS p ON p.&quot;_id&quot; = c.&quot;_parent&quot;;
+
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_ALLERGIES AS
+SELECT p.&quot;mongo_id&quot; AS RECORD_ID, &#x27;MODERN_EHR&#x27; AS SOURCE_SYSTEM, al.&quot;substance&quot; || &#x27; (&#x27; || al.&quot;reaction&quot; || &#x27;)&#x27; AS ALLERGY_AS_RECORDED,
+       CASE WHEN (UPPER(al.&quot;substance&quot;) LIKE &#x27;%PENICILLIN%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%AMOXY%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%AMPICILLIN%&#x27;) THEN &#x27;PENICILLIN&#x27;
+            WHEN (UPPER(al.&quot;substance&quot;) LIKE &#x27;%SULPHA%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%SULFA%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%SULFONAMIDE%&#x27;) THEN &#x27;SULFONAMIDE&#x27;
+            WHEN (UPPER(al.&quot;substance&quot;) LIKE &#x27;%NSAID%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%IBUPROFEN%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%DICLOFENAC%&#x27;) THEN &#x27;NSAID&#x27;
+            WHEN (UPPER(al.&quot;substance&quot;) LIKE &#x27;%CEFTRIAXONE%&#x27; OR UPPER(al.&quot;substance&quot;) LIKE &#x27;%CEPHALO%&#x27;) THEN &#x27;CEPHALOSPORIN&#x27; END AS DRUG_CLASS,
+       al.&quot;severity&quot; AS SEVERITY
+FROM HOSP_EHR_PATIENTS.&quot;PATIENTS_allergies_arr&quot; al JOIN HOSP_EHR_PATIENTS.PATIENTS p ON p.&quot;_id&quot; = al.&quot;_parent&quot;;
+
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_ENCOUNTERS AS
+SELECT e.&quot;mongo_id&quot; AS ENCOUNTER_ID, e.&quot;patientId&quot; AS RECORD_ID, &#x27;MODERN_EHR&#x27; AS SOURCE_SYSTEM, e.&quot;branch&quot; AS BRANCH,
+       e.&quot;class&quot; AS ENCOUNTER_CLASS, e.&quot;department&quot; AS DEPARTMENT,
+       TO_DATE(SUBSTR(e.&quot;admitted&quot;, 1, 10), &#x27;YYYY-MM-DD&#x27;) AS ADMIT_DATE, TO_DATE(e.&quot;discharged&quot;, &#x27;YYYY-MM-DD&#x27;) AS DISCHARGE_DATE,
+       e.&quot;status&quot; AS STATUS, d.&quot;code&quot; AS DX_CODE, d.&quot;display&quot; AS DIAGNOSIS
+FROM HOSP_EHR_ENCOUNTERS.ENCOUNTERS e
+LEFT JOIN HOSP_EHR_ENCOUNTERS.&quot;ENCOUNTERS_diagnosis&quot; d ON d.&quot;_id&quot; = e.&quot;diagnosis|object&quot;;
+
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_MEDICATIONS AS
+SELECT e.&quot;mongo_id&quot; AS ENCOUNTER_ID, e.&quot;patientId&quot; AS RECORD_ID, &#x27;MODERN_EHR&#x27; AS SOURCE_SYSTEM, m.&quot;name&quot; AS DRUG, m.&quot;dose&quot; AS DOSE,
+       m.&quot;status&quot; AS ORDER_STATUS
+FROM HOSP_EHR_ENCOUNTERS.&quot;ENCOUNTERS_medications_arr&quot; m JOIN HOSP_EHR_ENCOUNTERS.ENCOUNTERS e ON e.&quot;_id&quot; = m.&quot;_parent&quot;;
+
+CREATE OR REPLACE VIEW HOSP_SRC.MODERN_OBSERVATIONS AS
+SELECT e.&quot;mongo_id&quot; AS ENCOUNTER_ID, e.&quot;patientId&quot; AS RECORD_ID, o.&quot;code&quot; AS OBS_CODE, o.&quot;value&quot; AS OBS_VALUE, o.&quot;unit&quot; AS UNIT
+FROM HOSP_EHR_ENCOUNTERS.&quot;ENCOUNTERS_observations_arr&quot; o JOIN HOSP_EHR_ENCOUNTERS.ENCOUNTERS e ON e.&quot;_id&quot; = o.&quot;_parent&quot;;
+
+-- ---------------------------------------------------------------- one vocabulary across both systems
+CREATE OR REPLACE VIEW HOSP_SRC.ALL_ENCOUNTERS AS
+SELECT * FROM HOSP_SRC.LEGACY_ENCOUNTERS UNION ALL SELECT * FROM HOSP_SRC.MODERN_ENCOUNTERS;
+CREATE OR REPLACE VIEW HOSP_SRC.ALL_ALLERGIES AS
+SELECT * FROM HOSP_SRC.LEGACY_ALLERGIES UNION ALL SELECT * FROM HOSP_SRC.MODERN_ALLERGIES;
+CREATE OR REPLACE VIEW HOSP_SRC.ALL_MEDICATIONS AS
+SELECT * FROM HOSP_SRC.LEGACY_MEDICATIONS UNION ALL SELECT * FROM HOSP_SRC.MODERN_MEDICATIONS;
+
+-- Drug class per medication, curated once (the pharmacy&#x27;s formulary would own this table).
+CREATE SCHEMA IF NOT EXISTS HOSP_CORE;
+CREATE OR REPLACE TABLE HOSP_CORE.DRUG_CLASS (DRUG VARCHAR(60), DRUG_CLASS VARCHAR(20));
+INSERT INTO HOSP_CORE.DRUG_CLASS VALUES
+  (&#x27;AMOXICILLIN-CLAVULANATE&#x27;, &#x27;PENICILLIN&#x27;), (&#x27;AMOXICILLIN&#x27;, &#x27;PENICILLIN&#x27;), (&#x27;AMPICILLIN&#x27;, &#x27;PENICILLIN&#x27;),
+  (&#x27;PIPERACILLIN-TAZOBACTAM&#x27;, &#x27;PENICILLIN&#x27;), (&#x27;CEFTRIAXONE&#x27;, &#x27;CEPHALOSPORIN&#x27;), (&#x27;CO-TRIMOXAZOLE&#x27;, &#x27;SULFONAMIDE&#x27;),
+  (&#x27;IBUPROFEN&#x27;, &#x27;NSAID&#x27;), (&#x27;DICLOFENAC&#x27;, &#x27;NSAID&#x27;);</code></pre>
+<h3><code>sql/20_mpi.sql</code></h3>
+<pre><code>-- HOSP_CORE: the master patient index. One person, many records: legacy HIS (per branch) + modern EHR + PACS.
+-- Rebuilt from the LIVE sources by this script (in production: nightly, or on every new registration).
+-- Deterministic rules, every link explained in MATCH_REASON. No model, nothing to retrain.
+
+-- 1. every patient record the chain holds, read live from Postgres and MongoDB
+CREATE OR REPLACE TABLE HOSP_CORE.PATIENT_RECORDS AS
+SELECT RECORD_ID, SOURCE_SYSTEM, BRANCH, NAME_AS_RECORDED, GIVEN_NAME, FAMILY_NAME, SEX, BIRTH_DATE, BIRTH_DATE_SWAPPED,
+       BIRTH_DATE_AS_RECORDED, AGE_ONLY, MOBILE, CITY
+FROM HOSP_SRC.LEGACY_PATIENTS
+UNION ALL
+SELECT RECORD_ID, SOURCE_SYSTEM, BRANCH, NAME_AS_RECORDED, GIVEN_NAME, FAMILY_NAME, SEX, BIRTH_DATE, CAST(NULL AS DATE),
+       BIRTH_DATE_AS_RECORDED, CAST(NULL AS DECIMAL(4,0)), MOBILE, CITY
+FROM HOSP_SRC.MODERN_PATIENTS;
+
+-- 2. score candidate pairs (blocked on sex + one strong key, so this is not a full cross join)
+CREATE OR REPLACE TABLE HOSP_CORE.MATCH_CANDIDATES AS
+WITH pairs AS (
+  SELECT a.RECORD_ID AS A_ID, b.RECORD_ID AS B_ID, a.SOURCE_SYSTEM AS A_SYS, b.SOURCE_SYSTEM AS B_SYS,
+    CASE WHEN a.GIVEN_NAME = b.GIVEN_NAME THEN 25
+         WHEN SOUNDEX(a.GIVEN_NAME) = SOUNDEX(b.GIVEN_NAME) OR EDIT_DISTANCE(a.GIVEN_NAME, b.GIVEN_NAME) &lt;= 2 THEN 15 ELSE 0 END AS S_GIVEN,
+    CASE WHEN a.FAMILY_NAME = b.FAMILY_NAME AND LENGTH(a.FAMILY_NAME) &gt; 1 THEN 15
+         WHEN SUBSTR(a.FAMILY_NAME, 1, 1) = SUBSTR(b.FAMILY_NAME, 1, 1) THEN 10 ELSE -15 END AS S_FAMILY,
+    CASE WHEN a.BIRTH_DATE = b.BIRTH_DATE THEN 35
+         WHEN a.BIRTH_DATE_SWAPPED = b.BIRTH_DATE OR b.BIRTH_DATE_SWAPPED = a.BIRTH_DATE THEN 25
+         WHEN (a.BIRTH_DATE IS NULL AND ABS(a.AGE_ONLY - YEARS_BETWEEN(CURRENT_DATE, b.BIRTH_DATE)) &lt;= 1)
+           OR (b.BIRTH_DATE IS NULL AND ABS(b.AGE_ONLY - YEARS_BETWEEN(CURRENT_DATE, a.BIRTH_DATE)) &lt;= 1) THEN 10
+         ELSE 0 END AS S_BIRTH,
+    CASE WHEN a.MOBILE = b.MOBILE THEN 30 ELSE 0 END AS S_MOBILE,
+    CASE WHEN a.BIRTH_DATE_SWAPPED = b.BIRTH_DATE OR b.BIRTH_DATE_SWAPPED = a.BIRTH_DATE THEN 1 ELSE 0 END AS SWAPPED,
+    CASE WHEN a.BIRTH_DATE IS NULL OR b.BIRTH_DATE IS NULL THEN 1 ELSE 0 END AS AGE_ONLY
+  FROM HOSP_CORE.PATIENT_RECORDS a
+  JOIN HOSP_CORE.PATIENT_RECORDS b
+    ON a.SEX = b.SEX AND a.RECORD_ID &lt; b.RECORD_ID
+   AND NOT (a.SOURCE_SYSTEM = &#x27;MODERN_EHR&#x27; AND b.SOURCE_SYSTEM = &#x27;MODERN_EHR&#x27;)           -- the EHR is one database: no duplicates inside it
+   AND NOT (a.SOURCE_SYSTEM = &#x27;LEGACY_HIS&#x27; AND b.SOURCE_SYSTEM = &#x27;LEGACY_HIS&#x27; AND a.BRANCH = b.BRANCH)
+   AND (SOUNDEX(a.GIVEN_NAME) = SOUNDEX(b.GIVEN_NAME) OR a.MOBILE = b.MOBILE OR a.BIRTH_DATE = b.BIRTH_DATE))
+SELECT p.*, S_GIVEN + S_FAMILY + S_BIRTH + S_MOBILE AS SCORE,
+       TRIM(CASE S_GIVEN WHEN 25 THEN &#x27;given name exact · &#x27; WHEN 15 THEN &#x27;given name sounds alike · &#x27; ELSE &#x27;&#x27; END
+         || CASE S_FAMILY WHEN 15 THEN &#x27;surname exact · &#x27; WHEN 10 THEN &#x27;surname initial agrees · &#x27; ELSE &#x27;surname differs · &#x27; END
+         || CASE WHEN S_BIRTH = 35 THEN &#x27;birth date exact · &#x27; WHEN SWAPPED = 1 THEN &#x27;birth date with day/month swapped · &#x27;
+                 WHEN S_BIRTH = 10 THEN &#x27;age agrees (no birth date recorded) · &#x27; ELSE &#x27;&#x27; END
+         || CASE S_MOBILE WHEN 30 THEN &#x27;mobile exact&#x27; ELSE &#x27;&#x27; END, &#x27; ·&#x27;) AS MATCH_REASON
+FROM pairs p;
+
+-- 3. link: every record joins the best-scoring partner at or above the threshold; the modern EHR record anchors a person
+CREATE OR REPLACE TABLE HOSP_CORE.MPI AS
+WITH links AS (
+  SELECT A_ID, B_ID, SCORE, MATCH_REASON FROM HOSP_CORE.MATCH_CANDIDATES WHERE SCORE &gt;= 70),
+to_modern AS (                                   -- legacy record -&gt; its best modern record
+  SELECT L_ID, M_ID, SCORE, MATCH_REASON FROM (
+    SELECT CASE WHEN A_SYS = &#x27;LEGACY_HIS&#x27; THEN A_ID ELSE B_ID END AS L_ID,
+           CASE WHEN A_SYS = &#x27;MODERN_EHR&#x27; THEN A_ID ELSE B_ID END AS M_ID, SCORE, MATCH_REASON,
+           ROW_NUMBER() OVER (PARTITION BY CASE WHEN A_SYS = &#x27;LEGACY_HIS&#x27; THEN A_ID ELSE B_ID END ORDER BY SCORE DESC) AS RN
+    FROM HOSP_CORE.MATCH_CANDIDATES WHERE SCORE &gt;= 70 AND A_SYS &lt;&gt; B_SYS) WHERE RN = 1),
+legacy_pairs AS (                                -- legacy &lt;-&gt; legacy across branches (Branch A and Branch C registered them twice)
+  SELECT A_ID, B_ID, SCORE, MATCH_REASON, ROW_NUMBER() OVER (PARTITION BY A_ID ORDER BY SCORE DESC) AS RN
+  FROM HOSP_CORE.MATCH_CANDIDATES WHERE SCORE &gt;= 70 AND A_SYS = &#x27;LEGACY_HIS&#x27; AND B_SYS = &#x27;LEGACY_HIS&#x27;),
+anchor AS (
+  SELECT r.RECORD_ID, r.SOURCE_SYSTEM,
+         CASE WHEN r.SOURCE_SYSTEM = &#x27;MODERN_EHR&#x27; THEN r.RECORD_ID
+              ELSE COALESCE(tm.M_ID, tma.M_ID, tmb.M_ID, LEAST(r.RECORD_ID, COALESCE(lpa.B_ID, lpb.A_ID, r.RECORD_ID))) END AS ANCHOR_ID,
+         COALESCE(tm.SCORE, lpa.SCORE, lpb.SCORE) AS LINK_SCORE,
+         COALESCE(tm.MATCH_REASON, lpa.MATCH_REASON, lpb.MATCH_REASON) AS MATCH_REASON
+  FROM HOSP_CORE.PATIENT_RECORDS r
+  LEFT JOIN to_modern tm ON tm.L_ID = r.RECORD_ID
+  LEFT JOIN legacy_pairs lpa ON lpa.A_ID = r.RECORD_ID AND lpa.RN = 1
+  LEFT JOIN legacy_pairs lpb ON lpb.B_ID = r.RECORD_ID AND lpb.RN = 1
+  LEFT JOIN to_modern tma ON tma.L_ID = lpa.B_ID          -- transitive: my legacy twin is linked to a modern record
+  LEFT JOIN to_modern tmb ON tmb.L_ID = lpb.A_ID)
+SELECT &#x27;UP-&#x27; || LPAD(DENSE_RANK() OVER (ORDER BY ANCHOR_ID), 6, &#x27;0&#x27;) AS UNIFIED_ID, RECORD_ID, SOURCE_SYSTEM,
+       REPLACE(RECORD_ID, &#x27;/&#x27;, &#x27;&#x27;) AS PACS_PATIENT_ID,          -- what the imaging system writes into the DICOM PatientID tag
+       ANCHOR_ID, LINK_SCORE, MATCH_REASON
+FROM anchor;
+
+-- 4. borderline pairs a human should look at (never auto-linked)
+CREATE OR REPLACE VIEW HOSP_CORE.MATCH_REVIEW_QUEUE AS
+SELECT A_ID, B_ID, SCORE, MATCH_REASON FROM HOSP_CORE.MATCH_CANDIDATES WHERE SCORE BETWEEN 55 AND 69;</code></pre>
+<h3><code>sql/25_imaging.sql</code></h3>
+<pre><code>-- The PACS on Amazon S3. The images stay as files; Exasol reads only the header index, in place, on every query.
+-- CSV, not the Parquet copy beside it: on this Personal build the Parquet reader adds a fixed ~12 s to every request to an
+-- amazonaws.com host (even for a missing file, with or without credentials); the CSV reader answers in 0.3 s.
+-- The connection (a read-only IAM user) is created by setup/04_imaging.sh, which also fills in {{S3_PREFIX}} (HC_S3_PREFIX in
+-- config.env; empty by default). Run this file through setup/04_imaging.sh, not on its own.
+CREATE OR REPLACE VIEW HOSP_SRC.IMAGING_INDEX AS
+SELECT * FROM (
+  IMPORT INTO (PATIENT_ID VARCHAR(40), PATIENT_NAME VARCHAR(80), PATIENT_BIRTH_DATE VARCHAR(8), PATIENT_SEX VARCHAR(1),
+               STUDY_INSTANCE_UID VARCHAR(80), SERIES_INSTANCE_UID VARCHAR(80), SOP_INSTANCE_UID VARCHAR(80),
+               ACCESSION_NUMBER VARCHAR(20), MODALITY VARCHAR(4), BODY_PART VARCHAR(20), STUDY_DESCRIPTION VARCHAR(80),
+               STUDY_DATE VARCHAR(8), INSTITUTION VARCHAR(40), REFERRING_PHYSICIAN VARCHAR(40), MANUFACTURER VARCHAR(60),
+               ROWS_PX DECIMAL(6,0), COLS_PX DECIMAL(6,0), FILE_BYTES DECIMAL(12,0), S3_KEY VARCHAR(200), THUMB_KEY VARCHAR(120))
+  FROM CSV AT HOSP_S3 FILE &#x27;{{S3_PREFIX}}index/dicom_index.csv&#x27;);
+
+-- Typed, and tied to a person through the master patient index (the PACS writes the local record id into PatientID).
+CREATE OR REPLACE VIEW HOSP_CORE.IMAGING_STUDIES AS
+SELECT m.UNIFIED_ID, i.PATIENT_ID AS PACS_PATIENT_ID, m.RECORD_ID, i.PATIENT_NAME AS NAME_IN_DICOM,
+       TO_DATE(i.STUDY_DATE, &#x27;YYYYMMDD&#x27;) AS STUDY_DATE, i.MODALITY, i.BODY_PART, i.STUDY_DESCRIPTION,
+       i.INSTITUTION, i.REFERRING_PHYSICIAN, i.ACCESSION_NUMBER, i.STUDY_INSTANCE_UID,
+       &#x27;{{S3_PREFIX}}&#x27; || i.S3_KEY AS S3_KEY, &#x27;{{S3_PREFIX}}&#x27; || i.THUMB_KEY AS THUMB_KEY, i.FILE_BYTES
+FROM HOSP_SRC.IMAGING_INDEX i
+LEFT JOIN HOSP_CORE.MPI m ON m.PACS_PATIENT_ID = i.PATIENT_ID;</code></pre>
+<h3><code>sql/30_fused.sql</code></h3>
+<pre><code>-- HOSP_CORE: the fused, live picture. Every view joins live source data to the master patient index (UNIFIED_ID).
+-- Rule learned the hard way on 2026.2.0-nano.3: an aggregate with NO group key (or a GROUP BY expression) over a
+-- UNION ALL of virtual-schema views aborts the session (assert in querycreationvisitor.cpp). Always GROUP BY a column.
+
+CREATE OR REPLACE VIEW HOSP_CORE.ENCOUNTERS AS
+SELECT m.UNIFIED_ID, e.*, DAYS_BETWEEN(e.DISCHARGE_DATE, e.ADMIT_DATE) AS LENGTH_OF_STAY
+FROM HOSP_SRC.ALL_ENCOUNTERS e JOIN HOSP_CORE.MPI m ON m.RECORD_ID = e.RECORD_ID;
+
+CREATE OR REPLACE VIEW HOSP_CORE.ALLERGIES AS
+SELECT m.UNIFIED_ID, a.* FROM HOSP_SRC.ALL_ALLERGIES a JOIN HOSP_CORE.MPI m ON m.RECORD_ID = a.RECORD_ID;
+
+CREATE OR REPLACE VIEW HOSP_CORE.MEDICATIONS AS
+SELECT m.UNIFIED_ID, x.*, c.DRUG_CLASS
+FROM HOSP_SRC.ALL_MEDICATIONS x JOIN HOSP_CORE.MPI m ON m.RECORD_ID = x.RECORD_ID
+LEFT JOIN HOSP_CORE.DRUG_CLASS c ON c.DRUG = UPPER(x.DRUG);
+
+-- Diabetes, as either system knows it: a coded condition (EHR), a diabetes diagnosis or an HbA1c test (legacy).
+CREATE OR REPLACE VIEW HOSP_CORE.DIABETIC_PATIENTS AS
+SELECT DISTINCT m.UNIFIED_ID FROM HOSP_SRC.MODERN_CONDITIONS c JOIN HOSP_CORE.MPI m ON m.RECORD_ID = c.RECORD_ID WHERE c.CONDITION_CODE LIKE &#x27;E11%&#x27;
+UNION
+SELECT DISTINCT m.UNIFIED_ID FROM HOSP_LEGACY.LAB_RSLT l JOIN HOSP_LEGACY.VISIT_HDR v ON v.VISIT_NO = l.VISIT_NO
+  JOIN HOSP_CORE.MPI m ON m.RECORD_ID = v.PAT_NO WHERE l.TEST_CD = &#x27;HBA1C&#x27;;
+
+-- The safety check: a CURRENT order (draft or active, any system) for a drug in a class the patient is allergic to,
+-- with the allergy recorded in ANY system. KNOWN_WHERE_PRESCRIBED says whether the prescribing system could have seen it.
+CREATE OR REPLACE VIEW HOSP_CORE.ALLERGY_CONFLICTS AS
+SELECT o.UNIFIED_ID, o.ENCOUNTER_ID, o.SOURCE_SYSTEM AS PRESCRIBED_IN, o.RECORD_ID AS PRESCRIBED_UNDER, o.DRUG, o.DOSE, o.ORDER_STATUS,
+       o.DRUG_CLASS, a.ALLERGY_AS_RECORDED, a.SEVERITY, a.SOURCE_SYSTEM AS ALLERGY_RECORDED_IN, a.RECORD_ID AS ALLERGY_RECORD_ID,
+       CASE WHEN a.RECORD_ID = o.RECORD_ID THEN TRUE ELSE FALSE END AS KNOWN_WHERE_PRESCRIBED
+FROM HOSP_CORE.MEDICATIONS o
+JOIN HOSP_CORE.ALLERGIES a ON a.UNIFIED_ID = o.UNIFIED_ID AND a.DRUG_CLASS = o.DRUG_CLASS
+WHERE o.ORDER_STATUS IN (&#x27;draft&#x27;, &#x27;active&#x27;);
+
+-- 30-day readmission, the certified definition: an inpatient admission within 30 days of the same PERSON&#x27;s previous
+-- inpatient discharge, at any branch, in any system. VISIBLE_TO_ONE_SYSTEM: the previous stay is under the same record id,
+-- i.e. the branch system on its own would have counted it.
+CREATE OR REPLACE VIEW HOSP_CORE.READMISSIONS_30D AS
+WITH ip AS (
+  SELECT UNIFIED_ID, RECORD_ID, ENCOUNTER_ID, SOURCE_SYSTEM, BRANCH, ADMIT_DATE, DISCHARGE_DATE, DIAGNOSIS,
+         LAG(DISCHARGE_DATE) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_DISCHARGE,
+         LAG(RECORD_ID) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_RECORD_ID,
+         LAG(BRANCH) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_BRANCH,
+         LAG(ENCOUNTER_ID) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_ENCOUNTER_ID
+  FROM HOSP_CORE.ENCOUNTERS WHERE ENCOUNTER_CLASS = &#x27;inpatient&#x27;)
+SELECT UNIFIED_ID, ENCOUNTER_ID, BRANCH, SOURCE_SYSTEM, ADMIT_DATE, DIAGNOSIS, PREV_ENCOUNTER_ID, PREV_BRANCH, PREV_DISCHARGE,
+       DAYS_BETWEEN(ADMIT_DATE, PREV_DISCHARGE) AS DAYS_SINCE_DISCHARGE,
+       CASE WHEN PREV_RECORD_ID = RECORD_ID THEN TRUE ELSE FALSE END AS VISIBLE_TO_ONE_SYSTEM
+FROM ip
+WHERE PREV_DISCHARGE IS NOT NULL AND DAYS_BETWEEN(ADMIT_DATE, PREV_DISCHARGE) BETWEEN 0 AND 30;
+
+-- Similar cases: cosine similarity between notes is a join + GROUP BY over the long, narrow vector table.
+-- Usage: WHERE q.NOTE_ID = &#x27;&lt;note&gt;&#x27; ; the text of each note stays in its source system.
+CREATE OR REPLACE VIEW HOSP_CORE.NOTES AS
+SELECT n.NOTE_ID, n.SOURCE_SYSTEM, n.RECORD_ID, n.ENCOUNTER_ID, m.UNIFIED_ID
+FROM HOSP_CORE.NOTE_INDEX n JOIN HOSP_CORE.MPI m ON m.RECORD_ID = n.RECORD_ID;</code></pre>
+<h3><code>sql/40_governed_views.sql</code></h3>
+<pre><code>-- HOSP_GOV: the governed semantic views:
+-- definitions live in the view (COMMENT IS), rows are filtered by CURRENT_USER through ACCESS_MAP, and an AI client
+-- connected through the Exasol MCP server as a named user can read these views and nothing else.
+-- New here: PHI masking. PHI_LEVEL &#x27;FULL&#x27; (treating clinician) sees identity; &#x27;MASKED&#x27; (analyst) sees a pseudonym.
+CREATE SCHEMA IF NOT EXISTS HOSP_GOV;
+
+CREATE OR REPLACE TABLE HOSP_GOV.ACCESS_MAP (USER_NAME VARCHAR(128), BRANCH VARCHAR(3), PHI_LEVEL VARCHAR(6));
+INSERT INTO HOSP_GOV.ACCESS_MAP VALUES
+  (&#x27;SYS&#x27;, &#x27;*&#x27;, &#x27;FULL&#x27;),                    -- the demo console
+  (&#x27;HOSP_DR_BRB&#x27;, &#x27;BRB&#x27;, &#x27;FULL&#x27;),         -- treating physician, Branch B: own branch&#x27;s patients, full history from every branch
+  (&#x27;HOSP_QUALITY_ANALYST&#x27;, &#x27;*&#x27;, &#x27;MASKED&#x27;); -- quality &amp; readmissions analyst: every branch, no identities
+
+-- One row per person, built from the native master patient index (fast, no source round trip).
+CREATE OR REPLACE VIEW HOSP_CORE.PATIENT_SUMMARY AS
+SELECT m.UNIFIED_ID,
+       COALESCE(MAX(CASE WHEN r.SOURCE_SYSTEM = &#x27;MODERN_EHR&#x27; THEN r.NAME_AS_RECORDED END),
+                MAX(INITCAP(r.GIVEN_NAME) || &#x27; &#x27; || r.FAMILY_NAME)) AS PATIENT_NAME,
+       MAX(r.SEX) AS SEX, MAX(r.BIRTH_DATE) AS BIRTH_DATE, MAX(r.MOBILE) AS MOBILE,
+       COUNT(*) AS RECORDS, GROUP_CONCAT(DISTINCT r.SOURCE_SYSTEM ORDER BY r.SOURCE_SYSTEM SEPARATOR &#x27; + &#x27;) AS SYSTEMS,
+       GROUP_CONCAT(DISTINCT r.BRANCH ORDER BY r.BRANCH SEPARATOR &#x27;, &#x27;) AS BRANCHES,
+       GROUP_CONCAT(r.RECORD_ID ORDER BY r.SOURCE_SYSTEM DESC SEPARATOR &#x27;, &#x27;) AS RECORD_IDS
+FROM HOSP_CORE.MPI m JOIN HOSP_CORE.PATIENT_RECORDS r ON r.RECORD_ID = m.RECORD_ID
+GROUP BY m.UNIFIED_ID;
+
+-- Who may see whom: patients registered at one of the caller&#x27;s branches (&#x27;*&#x27; = all). Not granted to anyone.
+CREATE OR REPLACE VIEW HOSP_GOV.VISIBLE_PATIENTS AS
+SELECT DISTINCT m.UNIFIED_ID, a.PHI_LEVEL
+FROM HOSP_CORE.MPI m JOIN HOSP_CORE.PATIENT_RECORDS r ON r.RECORD_ID = m.RECORD_ID
+JOIN HOSP_GOV.ACCESS_MAP a ON a.USER_NAME = CURRENT_USER AND (a.BRANCH = &#x27;*&#x27; OR a.BRANCH = r.BRANCH);
+
+CREATE OR REPLACE VIEW HOSP_GOV.PATIENTS AS
+SELECT p.UNIFIED_ID,
+       CASE WHEN v.PHI_LEVEL = &#x27;FULL&#x27; THEN p.PATIENT_NAME ELSE &#x27;Patient &#x27; || SUBSTR(HASH_SHA1(p.UNIFIED_ID), 1, 6) END AS PATIENT_NAME,
+       p.SEX, CASE WHEN v.PHI_LEVEL = &#x27;FULL&#x27; THEN p.BIRTH_DATE END AS BIRTH_DATE, YEAR(p.BIRTH_DATE) AS BIRTH_YEAR,
+       YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE) AS AGE, CASE WHEN v.PHI_LEVEL = &#x27;FULL&#x27; THEN p.MOBILE END AS MOBILE,
+       p.RECORDS, p.SYSTEMS, p.BRANCHES
+FROM HOSP_CORE.PATIENT_SUMMARY p JOIN HOSP_GOV.VISIBLE_PATIENTS v ON v.UNIFIED_ID = p.UNIFIED_ID
+COMMENT IS &#x27;Governed data product. Grain: ONE ROW PER PERSON (UNIFIED_ID from the master patient index), however many records the branches hold. Rows are limited to the patients the caller may see; for a MASKED caller PATIENT_NAME is a pseudonym and BIRTH_DATE and MOBILE are NULL. SYSTEMS lists where this person has records (LEGACY_HIS = Branch A/Branch C HIS, MODERN_EHR = Branch B/Branch C EHR).&#x27;;
+
+CREATE OR REPLACE VIEW HOSP_GOV.ENCOUNTERS AS
+SELECT e.UNIFIED_ID, e.ENCOUNTER_ID, e.SOURCE_SYSTEM, e.BRANCH, e.ENCOUNTER_CLASS, e.DEPARTMENT, e.ADMIT_DATE, e.DISCHARGE_DATE,
+       e.LENGTH_OF_STAY, e.STATUS, e.DX_CODE, e.DIAGNOSIS
+FROM HOSP_CORE.ENCOUNTERS e JOIN HOSP_GOV.VISIBLE_PATIENTS v ON v.UNIFIED_ID = e.UNIFIED_ID
+COMMENT IS &#x27;Grain: ONE ROW PER ENCOUNTER (visit or admission) from every branch system, read live. ENCOUNTER_CLASS = inpatient, outpatient or emergency. STATUS in-progress = the patient is in a bed now. LENGTH_OF_STAY is in days (NULL while admitted). Join to PATIENTS on UNIFIED_ID.&#x27;;
+
+CREATE OR REPLACE VIEW HOSP_GOV.READMISSIONS_30D AS
+SELECT r.UNIFIED_ID, r.ENCOUNTER_ID, r.BRANCH, r.SOURCE_SYSTEM, r.ADMIT_DATE, r.DIAGNOSIS, r.PREV_BRANCH, r.PREV_DISCHARGE,
+       r.DAYS_SINCE_DISCHARGE, r.VISIBLE_TO_ONE_SYSTEM
+FROM HOSP_CORE.READMISSIONS_30D r JOIN HOSP_GOV.VISIBLE_PATIENTS v ON v.UNIFIED_ID = r.UNIFIED_ID
+COMMENT IS &#x27;Certified definition of a 30-day readmission: an inpatient admission within 0-30 days of the SAME PERSON&#x27;&#x27;s previous inpatient discharge, at ANY branch, in ANY system. Grain: one row per readmission. VISIBLE_TO_ONE_SYSTEM = FALSE means the previous stay is under a different record id, so a single branch system cannot count it. Use this view for readmission rates; do not recompute from ENCOUNTERS.&#x27;;
+
+CREATE OR REPLACE VIEW HOSP_GOV.ALLERGY_ALERTS AS
+SELECT c.UNIFIED_ID, p.PATIENT_NAME, c.ENCOUNTER_ID, c.PRESCRIBED_IN, c.DRUG, c.DOSE, c.ORDER_STATUS, c.DRUG_CLASS,
+       c.ALLERGY_AS_RECORDED, c.SEVERITY, c.ALLERGY_RECORDED_IN, c.KNOWN_WHERE_PRESCRIBED
+FROM HOSP_CORE.ALLERGY_CONFLICTS c JOIN HOSP_GOV.PATIENTS p ON p.UNIFIED_ID = c.UNIFIED_ID
+COMMENT IS &#x27;Certified safety check. Grain: one row per CURRENT medication order (draft or active) whose drug class matches an allergy recorded for the same person in ANY system. KNOWN_WHERE_PRESCRIBED = FALSE: the prescribing system holds no such allergy, so only the fused record reveals the conflict.&#x27;;
+
+CREATE OR REPLACE VIEW HOSP_GOV.IMAGING_STUDIES AS
+SELECT i.UNIFIED_ID, i.STUDY_DATE, i.MODALITY, i.BODY_PART, i.STUDY_DESCRIPTION, i.INSTITUTION, i.ACCESSION_NUMBER, i.S3_KEY
+FROM HOSP_CORE.IMAGING_STUDIES i JOIN HOSP_GOV.VISIBLE_PATIENTS v ON v.UNIFIED_ID = i.UNIFIED_ID
+COMMENT IS &#x27;Grain: ONE ROW PER IMAGING STUDY in the PACS on Amazon S3 (DICOM header index, read in place). MODALITY: DX/CR = X-ray, CT, MR = MRI. The images stay in S3 (S3_KEY); no pixels pass through the database.&#x27;;
+
+-- Read-only role for people and their AI agents: SELECT on the governed views, nothing else.
+CREATE ROLE HOSP_AGENT_READER;   -- fails harmlessly if it already exists
+GRANT SELECT ON HOSP_GOV.PATIENTS TO HOSP_AGENT_READER;
+GRANT SELECT ON HOSP_GOV.ENCOUNTERS TO HOSP_AGENT_READER;
+GRANT SELECT ON HOSP_GOV.READMISSIONS_30D TO HOSP_AGENT_READER;
+GRANT SELECT ON HOSP_GOV.ALLERGY_ALERTS TO HOSP_AGENT_READER;
+GRANT SELECT ON HOSP_GOV.IMAGING_STUDIES TO HOSP_AGENT_READER;</code></pre>
+<h3><code>sql/50_accelerate.sql</code></h3>
+<pre><code>-- HOSP_ACCEL: federate first, then copy only what people ask about every day. One statement builds it from the live
+-- sources (Postgres + MongoDB through the master patient index); the readmission definition is the same SQL as HOSP_CORE.
+CREATE SCHEMA IF NOT EXISTS HOSP_ACCEL;
+
+CREATE OR REPLACE TABLE HOSP_ACCEL.ENCOUNTERS AS
+SELECT UNIFIED_ID, ENCOUNTER_ID, RECORD_ID, SOURCE_SYSTEM, BRANCH, ENCOUNTER_CLASS, DEPARTMENT, ADMIT_DATE, DISCHARGE_DATE,
+       STATUS, DX_CODE, DIAGNOSIS, LENGTH_OF_STAY, CURRENT_TIMESTAMP AS COPIED_AT
+FROM HOSP_CORE.ENCOUNTERS;
+
+CREATE OR REPLACE VIEW HOSP_ACCEL.READMISSIONS_30D AS
+WITH ip AS (
+  SELECT UNIFIED_ID, RECORD_ID, ENCOUNTER_ID, SOURCE_SYSTEM, BRANCH, ADMIT_DATE, DISCHARGE_DATE, DIAGNOSIS,
+         LAG(DISCHARGE_DATE) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_DISCHARGE,
+         LAG(RECORD_ID) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_RECORD_ID,
+         LAG(BRANCH) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_BRANCH,
+         LAG(ENCOUNTER_ID) OVER (PARTITION BY UNIFIED_ID ORDER BY ADMIT_DATE, ENCOUNTER_ID) AS PREV_ENCOUNTER_ID
+  FROM HOSP_ACCEL.ENCOUNTERS WHERE ENCOUNTER_CLASS = &#x27;inpatient&#x27;)
+SELECT UNIFIED_ID, ENCOUNTER_ID, BRANCH, SOURCE_SYSTEM, ADMIT_DATE, DIAGNOSIS, PREV_ENCOUNTER_ID, PREV_BRANCH, PREV_DISCHARGE,
+       DAYS_BETWEEN(ADMIT_DATE, PREV_DISCHARGE) AS DAYS_SINCE_DISCHARGE,
+       CASE WHEN PREV_RECORD_ID = RECORD_ID THEN TRUE ELSE FALSE END AS VISIBLE_TO_ONE_SYSTEM
+FROM ip
+WHERE PREV_DISCHARGE IS NOT NULL AND DAYS_BETWEEN(ADMIT_DATE, PREV_DISCHARGE) BETWEEN 0 AND 30;</code></pre>
+<h3><code>sql/60_console.sql</code></h3>
+<pre><code>-- HOSP_CONSOLE: what the dash-server console needs beyond the HOSP_CORE views. The console runs as the kit&#x27;s read-only
+-- user (MCP_READONLY), which cannot read the DBA audit tables, so the audit log is exposed through a view owned by the
+-- admin: only the two named demo users&#x27; SELECTs, nothing else in the audit log.
+CREATE SCHEMA IF NOT EXISTS HOSP_CONSOLE;
+CREATE OR REPLACE VIEW HOSP_CONSOLE.AGENT_AUDIT AS
+SELECT s.USER_NAME, a.START_TIME, a.SUCCESS, ROUND(a.DURATION, 2) AS SECS, SUBSTR(a.SQL_TEXT, 1, 70) AS SQL_TEXT
+FROM   EXA_DBA_AUDIT_SQL a
+JOIN   EXA_DBA_AUDIT_SESSIONS s ON s.SESSION_ID = a.SESSION_ID
+WHERE  s.USER_NAME IN (&#x27;HOSP_DR_BRB&#x27;, &#x27;HOSP_QUALITY_ANALYST&#x27;) AND a.COMMAND_NAME = &#x27;SELECT&#x27;
+  AND  a.SQL_TEXT NOT LIKE &#x27;/*snapshot execution*/%&#x27;;
+GRANT SELECT ON SCHEMA HOSP_CONSOLE TO MCP_READONLY;</code></pre>
+<!--APPX-SQL-END-->
+</section>
+
+<!-- ======================================================= B -->
+<section id="appx-q">
+<h2><span class="n">B</span>Appendix: every console query</h2>
+<p>The queries the console runs, one per file in the dash-server app (<code>queries/business/&lt;name&gt;.sql</code>), generated from <code>dash/console.py</code>.</p>
+<!--APPX-Q-START-->
+<h3><code>queries/business/who.sql</code></h3>
+<pre><code>-- every record the chain holds for her, read live from each system and tied together by the patient index
+SELECT &#x27;Legacy HIS&#x27; AS SOURCE_LABEL, l.BRANCH, l.RECORD_ID, l.NAME_AS_RECORDED, l.BIRTH_DATE_AS_RECORDED, l.MOBILE, m.LINK_SCORE, m.MATCH_REASON
+FROM   HOSP_SRC.LEGACY_PATIENTS l                      -- Postgres, Branch A (virtual schema)
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = l.RECORD_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)
+UNION ALL
+SELECT &#x27;Modern EHR&#x27;, p.BRANCH, p.RECORD_ID, p.NAME_AS_RECORDED, p.BIRTH_DATE_AS_RECORDED, p.MOBILE, m.LINK_SCORE, m.MATCH_REASON
+FROM   HOSP_SRC.MODERN_PATIENTS p                      -- MongoDB, Branch B (virtual schema)
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = p.RECORD_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)
+UNION ALL
+SELECT &#x27;PACS on S3&#x27;, i.INSTITUTION, i.PATIENT_ID, i.PATIENT_NAME, i.PATIENT_BIRTH_DATE, NULL, NULL, i.STUDY_DESCRIPTION || &#x27; · &#x27; || i.STUDY_DATE
+FROM   HOSP_SRC.IMAGING_INDEX i                        -- DICOM header index on S3, read in place
+JOIN   HOSP_CORE.MPI m ON m.PACS_PATIENT_ID = i.PATIENT_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)</code></pre>
+<h3><code>queries/business/allergy.sql</code></h3>
+<pre><code>-- a CURRENT order (draft or active) in any system x an allergy recorded for the same PERSON in any system
+SELECT DRUG, DOSE, ORDER_STATUS, PRESCRIBED_IN, PRESCRIBED_UNDER, DRUG_CLASS,
+       ALLERGY_AS_RECORDED, SEVERITY, ALLERGY_RECORDED_IN, ALLERGY_RECORD_ID, KNOWN_WHERE_PRESCRIBED
+FROM   HOSP_CORE.ALLERGY_CONFLICTS                     -- MongoDB orders x Postgres allergy notes, through the patient index
+WHERE  UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)</code></pre>
+<h3><code>queries/business/allergy_ehr.sql</code></h3>
+<pre><code>SELECT ALLERGIES_RECORDED FROM HOSP_SRC.MODERN_PATIENTS WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;</code></pre>
+<h3><code>queries/business/allergy_note.sql</code></h3>
+<pre><code>-- the 2019 discharge summary in the legacy HIS, read live
+SELECT v.VISIT_NO, v.ADM_DT, s.SUMM_TXT
+FROM   HOSP_LEGACY.DIS_SUMM s JOIN HOSP_LEGACY.VISIT_HDR v ON v.VISIT_NO = s.VISIT_NO
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = v.PAT_NO
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;) AND s.SUMM_TXT LIKE &#x27;%ANAPHYLAXIS%&#x27;</code></pre>
+<h3><code>queries/business/scans.sql</code></h3>
+<pre><code>SELECT STUDY_DATE, MODALITY, BODY_PART, STUDY_DESCRIPTION, INSTITUTION, PACS_PATIENT_ID, NAME_IN_DICOM,
+       ACCESSION_NUMBER, S3_KEY, THUMB_KEY, FILE_BYTES
+FROM   HOSP_CORE.IMAGING_STUDIES                       -- header index on S3 x patient index
+WHERE  UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)
+ORDER  BY STUDY_DATE</code></pre>
+<h3><code>queries/business/scans_all.sql</code></h3>
+<pre><code>SELECT MODALITY, COUNT(*) AS STUDIES, SUM(FILE_BYTES) AS BYTES FROM HOSP_SRC.IMAGING_INDEX GROUP BY MODALITY</code></pre>
+<h3><code>queries/business/similar.sql</code></h3>
+<pre><code>WITH q AS (SELECT DIM, VAL FROM HOSP_CORE.NOTE_VECTORS WHERE NOTE_ID = &#x27;M:ENC-BRB-2610-02605&#x27;),   -- her admission note from today
+sim AS (SELECT v.NOTE_ID, SUM(v.VAL * q.VAL) AS SIMILARITY       -- cosine similarity = join + GROUP BY
+        FROM HOSP_CORE.NOTE_VECTORS v JOIN q ON q.DIM = v.DIM GROUP BY v.NOTE_ID),
+cases AS (SELECT n.UNIFIED_ID, n.ENCOUNTER_ID, s.SIMILARITY FROM sim s JOIN HOSP_CORE.NOTES n ON n.NOTE_ID = s.NOTE_ID
+          WHERE n.UNIFIED_ID &lt;&gt; (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)),
+abx AS (SELECT ENCOUNTER_ID, DRUG FROM HOSP_CORE.MEDICATIONS                  -- both systems, live
+        WHERE UPPER(DRUG) IN (&#x27;AMOXICILLIN-CLAVULANATE&#x27;, &#x27;AMOXICILLIN&#x27;, &#x27;AMPICILLIN&#x27;, &#x27;PIPERACILLIN-TAZOBACTAM&#x27;, &#x27;LEVOFLOXACIN&#x27;,
+                              &#x27;DOXYCYCLINE&#x27;, &#x27;AZITHROMYCIN&#x27;, &#x27;CEFTRIAXONE&#x27;, &#x27;CLARITHROMYCIN&#x27;)),
+pen AS (SELECT UNIFIED_ID FROM HOSP_CORE.ALLERGIES WHERE DRUG_CLASS = &#x27;PENICILLIN&#x27; GROUP BY UNIFIED_ID),
+readm AS (SELECT PREV_ENCOUNTER_ID FROM HOSP_CORE.READMISSIONS_30D GROUP BY PREV_ENCOUNTER_ID)
+SELECT c.UNIFIED_ID, FLOOR(YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE)) AS AGE, e.BRANCH, e.SOURCE_SYSTEM, e.DIAGNOSIS, e.ADMIT_DATE,
+       e.LENGTH_OF_STAY, ROUND(c.SIMILARITY, 3) AS SIMILARITY, a.DRUG AS ANTIBIOTIC,
+       CASE WHEN pen.UNIFIED_ID IS NULL THEN FALSE ELSE TRUE END AS PENICILLIN_ALLERGY,
+       CASE WHEN r.PREV_ENCOUNTER_ID IS NULL THEN FALSE ELSE TRUE END AS READMITTED_30D
+FROM   cases c
+JOIN   HOSP_CORE.ENCOUNTERS e ON e.ENCOUNTER_ID = c.ENCOUNTER_ID AND e.ENCOUNTER_CLASS = &#x27;inpatient&#x27; AND e.STATUS = &#x27;finished&#x27;
+JOIN   HOSP_CORE.PATIENT_SUMMARY p ON p.UNIFIED_ID = c.UNIFIED_ID
+JOIN   HOSP_CORE.DIABETIC_PATIENTS d ON d.UNIFIED_ID = c.UNIFIED_ID           -- diabetic in EITHER system
+JOIN   pen ON pen.UNIFIED_ID = c.UNIFIED_ID                                     -- penicillin allergy, recorded in either system
+LEFT JOIN abx a ON a.ENCOUNTER_ID = c.ENCOUNTER_ID
+LEFT JOIN readm r ON r.PREV_ENCOUNTER_ID = c.ENCOUNTER_ID
+WHERE  YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE) &gt;= 60
+QUALIFY ROW_NUMBER() OVER (PARTITION BY c.UNIFIED_ID ORDER BY c.SIMILARITY DESC) = 1    -- best match per patient
+ORDER  BY c.SIMILARITY DESC
+LIMIT  6</code></pre>
+<h3><code>queries/business/similar_text.sql</code></h3>
+<pre><code>WITH q AS ({vec!r}),   -- the typed text, embedded by the same model as the notes
+sim AS (SELECT v.NOTE_ID, SUM(v.VAL * q.VAL) AS SIMILARITY       -- cosine similarity = join + GROUP BY
+        FROM HOSP_CORE.NOTE_VECTORS v JOIN q ON q.DIM = v.DIM GROUP BY v.NOTE_ID),
+cases AS (SELECT n.UNIFIED_ID, n.ENCOUNTER_ID, s.SIMILARITY FROM sim s JOIN HOSP_CORE.NOTES n ON n.NOTE_ID = s.NOTE_ID
+          WHERE n.UNIFIED_ID &lt;&gt; (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)),
+abx AS (SELECT ENCOUNTER_ID, DRUG FROM HOSP_CORE.MEDICATIONS                  -- both systems, live
+        WHERE UPPER(DRUG) IN (&#x27;AMOXICILLIN-CLAVULANATE&#x27;, &#x27;AMOXICILLIN&#x27;, &#x27;AMPICILLIN&#x27;, &#x27;PIPERACILLIN-TAZOBACTAM&#x27;, &#x27;LEVOFLOXACIN&#x27;,
+                              &#x27;DOXYCYCLINE&#x27;, &#x27;AZITHROMYCIN&#x27;, &#x27;CEFTRIAXONE&#x27;, &#x27;CLARITHROMYCIN&#x27;)),
+pen AS (SELECT UNIFIED_ID FROM HOSP_CORE.ALLERGIES WHERE DRUG_CLASS = &#x27;PENICILLIN&#x27; GROUP BY UNIFIED_ID),
+readm AS (SELECT PREV_ENCOUNTER_ID FROM HOSP_CORE.READMISSIONS_30D GROUP BY PREV_ENCOUNTER_ID)
+SELECT c.UNIFIED_ID, FLOOR(YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE)) AS AGE, e.BRANCH, e.SOURCE_SYSTEM, e.DIAGNOSIS, e.ADMIT_DATE,
+       e.LENGTH_OF_STAY, ROUND(c.SIMILARITY, 3) AS SIMILARITY, a.DRUG AS ANTIBIOTIC,
+       CASE WHEN pen.UNIFIED_ID IS NULL THEN FALSE ELSE TRUE END AS PENICILLIN_ALLERGY,
+       CASE WHEN r.PREV_ENCOUNTER_ID IS NULL THEN FALSE ELSE TRUE END AS READMITTED_30D
+FROM   cases c
+JOIN   HOSP_CORE.ENCOUNTERS e ON e.ENCOUNTER_ID = c.ENCOUNTER_ID AND e.ENCOUNTER_CLASS = &#x27;inpatient&#x27; AND e.STATUS = &#x27;finished&#x27;
+JOIN   HOSP_CORE.PATIENT_SUMMARY p ON p.UNIFIED_ID = c.UNIFIED_ID
+JOIN   HOSP_CORE.DIABETIC_PATIENTS d ON d.UNIFIED_ID = c.UNIFIED_ID           -- diabetic in EITHER system
+JOIN   pen ON pen.UNIFIED_ID = c.UNIFIED_ID                                     -- penicillin allergy, recorded in either system
+LEFT JOIN abx a ON a.ENCOUNTER_ID = c.ENCOUNTER_ID
+LEFT JOIN readm r ON r.PREV_ENCOUNTER_ID = c.ENCOUNTER_ID
+WHERE  YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE) &gt;= 60
+QUALIFY ROW_NUMBER() OVER (PARTITION BY c.UNIFIED_ID ORDER BY c.SIMILARITY DESC) = 1    -- best match per patient
+ORDER  BY c.SIMILARITY DESC
+LIMIT  6</code></pre>
+<h3><code>queries/business/readm_live.sql</code></h3>
+<pre><code>-- live: Postgres + MongoDB through the patient index, nothing copied
+SELECT BRANCH, COUNT(*) AS READMISSIONS, SUM(CASE WHEN VISIBLE_TO_ONE_SYSTEM THEN 0 ELSE 1 END) AS HIDDEN
+FROM   HOSP_CORE.READMISSIONS_30D
+GROUP  BY BRANCH ORDER BY BRANCH</code></pre>
+<h3><code>queries/business/readm_fast.sql</code></h3>
+<pre><code>-- on the copy inside Exasol (built once from the same live views)
+SELECT BRANCH, COUNT(*) AS READMISSIONS, SUM(CASE WHEN VISIBLE_TO_ONE_SYSTEM THEN 0 ELSE 1 END) AS HIDDEN
+FROM   HOSP_ACCEL.READMISSIONS_30D
+GROUP  BY BRANCH ORDER BY BRANCH</code></pre>
+<h3><code>queries/business/chain.sql</code></h3>
+<pre><code>-- every patient in a bed RIGHT NOW whose order contradicts an allergy recorded for the same person anywhere
+SELECT p.PATIENT_NAME, FLOOR(YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE)) AS AGE, c.ENCOUNTER_ID, c.PRESCRIBED_IN,
+       c.DRUG, c.ORDER_STATUS, c.ALLERGY_AS_RECORDED, c.SEVERITY, c.ALLERGY_RECORDED_IN, c.KNOWN_WHERE_PRESCRIBED
+FROM   HOSP_CORE.ALLERGY_CONFLICTS c                   -- MongoDB orders x Postgres + MongoDB allergies
+JOIN   HOSP_CORE.PATIENT_SUMMARY p ON p.UNIFIED_ID = c.UNIFIED_ID
+JOIN   HOSP_CORE.ENCOUNTERS e ON e.ENCOUNTER_ID = c.ENCOUNTER_ID AND e.STATUS = &#x27;in-progress&#x27;
+ORDER  BY c.KNOWN_WHERE_PRESCRIBED, c.SEVERITY DESC</code></pre>
+<h3><code>queries/business/inbed.sql</code></h3>
+<pre><code>SELECT STATUS, COUNT(*) AS PATIENTS FROM HOSP_SRC.MODERN_ENCOUNTERS WHERE STATUS = &#x27;in-progress&#x27; GROUP BY STATUS</code></pre>
+<h3><code>queries/business/mpi_total.sql</code></h3>
+<pre><code>SELECT &#x27;all&#x27; AS K, COUNT(*) AS RECORDS, COUNT(DISTINCT UNIFIED_ID) AS PEOPLE,
+       (SELECT COUNT(*) FROM HOSP_CORE.MATCH_REVIEW_QUEUE) AS REVIEW FROM HOSP_CORE.MPI GROUP BY &#x27;all&#x27;</code></pre>
+<h3><code>queries/business/flow_counts.sql</code></h3>
+<pre><code>SELECT
+  (SELECT COUNT(*) FROM HOSP_CORE.PATIENT_RECORDS WHERE SOURCE_SYSTEM = &#x27;LEGACY_HIS&#x27;) AS LEGACY,
+  (SELECT COUNT(*) FROM HOSP_CORE.PATIENT_RECORDS WHERE SOURCE_SYSTEM = &#x27;MODERN_EHR&#x27;) AS MODERN,
+  (SELECT COUNT(*) FROM HOSP_CORE.MPI) AS RECORDS,
+  (SELECT COUNT(DISTINCT UNIFIED_ID) FROM HOSP_CORE.MPI) AS PEOPLE,
+  (SELECT COUNT(*) FROM HOSP_CORE.MATCH_REVIEW_QUEUE) AS REVIEW,
+  (SELECT COUNT(*) FROM HOSP_CORE.NOTE_INDEX) AS NOTES,
+  (SELECT COUNT(*) FROM HOSP_CORE.NOTE_VECTORS) AS VECTORS
+FROM DUAL</code></pre>
+<h3><code>queries/business/agent_audit.sql</code></h3>
+<pre><code>SELECT USER_NAME, START_TIME, SUCCESS, SECS, SQL_TEXT
+FROM   HOSP_CONSOLE.AGENT_AUDIT                        -- the two named users&#x27; statements (view over EXA_DBA_AUDIT_SQL)
+ORDER  BY START_TIME DESC LIMIT 8</code></pre>
+<h3><code>queries/business/health_exa.sql</code></h3>
+<pre><code>SELECT 1 AS OK FROM DUAL</code></pre>
+<h3><code>queries/business/health_pg.sql</code></h3>
+<pre><code>SELECT COUNT(*) AS N FROM HOSP_LEGACY.PAT_MSTR WHERE PAT_NO = &#x27;BRA/2014/000731&#x27;</code></pre>
+<h3><code>queries/business/health_mongo.sql</code></h3>
+<pre><code>SELECT RECORD_ID, COUNT(*) AS N FROM HOSP_SRC.MODERN_PATIENTS WHERE RECORD_ID = &#x27;BRB-P-108842&#x27; GROUP BY RECORD_ID</code></pre>
+<h3><code>queries/business/health_s3.sql</code></h3>
+<pre><code>SELECT MODALITY, COUNT(*) AS N FROM HOSP_SRC.IMAGING_INDEX GROUP BY MODALITY</code></pre>
+<h3><code>queries/business/flow_t_mpi.sql</code></h3>
+<pre><code>SELECT RECORD_ID, SOURCE_SYSTEM, LINK_SCORE FROM HOSP_CORE.MPI WHERE UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)</code></pre>
+<h3><code>queries/business/flow_t_orders.sql</code></h3>
+<pre><code>SELECT DRUG, DOSE, ORDER_STATUS FROM HOSP_SRC.MODERN_MEDICATIONS WHERE RECORD_ID = &#x27;BRB-P-108842&#x27; AND ORDER_STATUS IN (&#x27;draft&#x27;, &#x27;active&#x27;)</code></pre>
+<h3><code>queries/business/flow_t_allergy.sql</code></h3>
+<pre><code>SELECT ALLERGY_AS_RECORDED, DRUG_CLASS, SEVERITY FROM HOSP_SRC.LEGACY_ALLERGIES WHERE RECORD_ID = &#x27;BRA/2014/000731&#x27;</code></pre>
+<h3><code>queries/business/flow_t_class.sql</code></h3>
+<pre><code>SELECT DRUG, DRUG_CLASS FROM HOSP_CORE.DRUG_CLASS WHERE DRUG = &#x27;AMOXICILLIN-CLAVULANATE&#x27;</code></pre>
+<h3><code>queries/business/flow_t_all.sql</code></h3>
+<pre><code>SELECT DRUG, ALLERGY_AS_RECORDED, KNOWN_WHERE_PRESCRIBED FROM HOSP_CORE.ALLERGY_CONFLICTS WHERE UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)</code></pre>
+<h3><code>explain/who.sql</code></h3>
+<pre><code>EXPLAIN VIRTUAL -- every record the chain holds for her, read live from each system and tied together by the patient index
+SELECT &#x27;Legacy HIS&#x27; AS SOURCE_LABEL, l.BRANCH, l.RECORD_ID, l.NAME_AS_RECORDED, l.BIRTH_DATE_AS_RECORDED, l.MOBILE, m.LINK_SCORE, m.MATCH_REASON
+FROM   HOSP_SRC.LEGACY_PATIENTS l                      -- Postgres, Branch A (virtual schema)
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = l.RECORD_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)
+UNION ALL
+SELECT &#x27;Modern EHR&#x27;, p.BRANCH, p.RECORD_ID, p.NAME_AS_RECORDED, p.BIRTH_DATE_AS_RECORDED, p.MOBILE, m.LINK_SCORE, m.MATCH_REASON
+FROM   HOSP_SRC.MODERN_PATIENTS p                      -- MongoDB, Branch B (virtual schema)
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = p.RECORD_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)
+UNION ALL
+SELECT &#x27;PACS on S3&#x27;, i.INSTITUTION, i.PATIENT_ID, i.PATIENT_NAME, i.PATIENT_BIRTH_DATE, NULL, NULL, i.STUDY_DESCRIPTION || &#x27; · &#x27; || i.STUDY_DATE
+FROM   HOSP_SRC.IMAGING_INDEX i                        -- DICOM header index on S3, read in place
+JOIN   HOSP_CORE.MPI m ON m.PACS_PATIENT_ID = i.PATIENT_ID
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;)</code></pre>
+<h3><code>explain/allergy.sql</code></h3>
+<pre><code>EXPLAIN VIRTUAL -- the 2019 discharge summary in the legacy HIS, read live
+SELECT v.VISIT_NO, v.ADM_DT, s.SUMM_TXT
+FROM   HOSP_LEGACY.DIS_SUMM s JOIN HOSP_LEGACY.VISIT_HDR v ON v.VISIT_NO = s.VISIT_NO
+JOIN   HOSP_CORE.MPI m ON m.RECORD_ID = v.PAT_NO
+WHERE  m.UNIFIED_ID = (SELECT UNIFIED_ID FROM HOSP_CORE.MPI WHERE RECORD_ID = &#x27;BRB-P-108842&#x27;) AND s.SUMM_TXT LIKE &#x27;%ANAPHYLAXIS%&#x27;</code></pre>
+<h3><code>explain/chain.sql</code></h3>
+<pre><code>EXPLAIN VIRTUAL -- every patient in a bed RIGHT NOW whose order contradicts an allergy recorded for the same person anywhere
+SELECT p.PATIENT_NAME, FLOOR(YEARS_BETWEEN(CURRENT_DATE, p.BIRTH_DATE)) AS AGE, c.ENCOUNTER_ID, c.PRESCRIBED_IN,
+       c.DRUG, c.ORDER_STATUS, c.ALLERGY_AS_RECORDED, c.SEVERITY, c.ALLERGY_RECORDED_IN, c.KNOWN_WHERE_PRESCRIBED
+FROM   HOSP_CORE.ALLERGY_CONFLICTS c                   -- MongoDB orders x Postgres + MongoDB allergies
+JOIN   HOSP_CORE.PATIENT_SUMMARY p ON p.UNIFIED_ID = c.UNIFIED_ID
+JOIN   HOSP_CORE.ENCOUNTERS e ON e.ENCOUNTER_ID = c.ENCOUNTER_ID AND e.STATUS = &#x27;in-progress&#x27;
+ORDER  BY c.KNOWN_WHERE_PRESCRIBED, c.SEVERITY DESC</code></pre>
+<h3><code>explain/readmit.sql</code></h3>
+<pre><code>EXPLAIN VIRTUAL -- live: Postgres + MongoDB through the patient index, nothing copied
+SELECT BRANCH, COUNT(*) AS READMISSIONS, SUM(CASE WHEN VISIBLE_TO_ONE_SYSTEM THEN 0 ELSE 1 END) AS HIDDEN
+FROM   HOSP_CORE.READMISSIONS_30D
+GROUP  BY BRANCH ORDER BY BRANCH</code></pre>
+<!--APPX-Q-END-->
+</section>
+
+<footer>Built from the running system on 28 October 2026 (appendices refresh with <code>docs/build_appendix.py</code>): SQL in <code>hospital_chain/sql</code>, set-up in <code>setup/</code>, generator and loaders in <code>data/</code>, console in <code>dash/</code>. Numbers are from the seeded data set (today = 2026-10-26) and measured on the demo laptop.</footer>
+</article>
+</main>
+</div>
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true });</script>

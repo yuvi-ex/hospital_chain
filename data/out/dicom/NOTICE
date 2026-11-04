@@ -1,0 +1,11 @@
+These DICOM files (and the PNG previews in ../thumbs) are derived from The Cancer Imaging Archive (TCIA),
+shared under the Creative Commons Attribution 4.0 license: https://creativecommons.org/licenses/by/4.0/
+
+Collections:
+  COVID-19-AR  https://doi.org/10.7937/tcia.2020.py71-5978  (chest X-ray, chest CT)
+  UPENN-GBM    https://doi.org/10.7937/TCIA.709X-DN49       (brain MRI)
+TCIA: Clark K. et al., J Digit Imaging 26(6), 2013. https://doi.org/10.1007/s10278-013-9622-7
+
+Changes made: one image per series; every header field replaced for a synthetic patient of this demo (identity, age,
+dates, UIDs, institution, referring physician); private tags and the source subject's size, weight and ethnicity
+removed; pixels downsampled to at most 768 px and stored as 12-bit uncompressed DICOM. See data/imaging.py.

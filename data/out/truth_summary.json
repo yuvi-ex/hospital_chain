@@ -1,0 +1,37 @@
+{
+ "people": 1200,
+ "records": 1609,
+ "notes": 3976,
+ "current_conflicts": [
+  [
+   "ENC-BRC-2610-02562",
+   "T00417",
+   "Amoxicillin-clavulanate"
+  ],
+  [
+   "ENC-BRC-2610-02563",
+   "T00635",
+   "Ampicillin"
+  ],
+  [
+   "ENC-BRC-2610-02574",
+   "T00142",
+   "Ampicillin"
+  ],
+  [
+   "ENC-BRC-2610-02579",
+   "T00978",
+   "Ibuprofen"
+  ],
+  [
+   "ENC-BRB-2610-02581",
+   "T00706",
+   "Diclofenac"
+  ],
+  [
+   "ENC-BRB-2610-02605",
+   "T00731",
+   "Amoxicillin-clavulanate"
+  ]
+ ]
+}
